@@ -1,3 +1,6 @@
+# Local/generated files not for repo
+AlignHire_Technical_Report.pdf
+
 # Environment variables
 .env
 .env.*
@@ -18,6 +21,7 @@ __pycache__/
 # IDE settings
 .vscode/
 .idea/
+.kiro/
 
 # Execution outputs (old and new)
 output/
@@ -29,3 +33,9 @@ input/resume.pdf
 input/jd.txt
 data/uploads/*
 !data/uploads/.gitkeep
+
+# IDE/tool private settings
+.kiro/
+
+# Temporary and generated artifacts
+AlignHire_Technical_Report.pdf
