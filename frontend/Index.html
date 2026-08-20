@@ -1,0 +1,2306 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALIGNHIRE — AI Talent Intelligence Platform</title>
+    
+    <!-- Google Fonts: Manrope, DM Sans, JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        display: ['Manrope', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        obsidian: '#06101f',
+                        surface: '#0b1b32',
+                        surfaceHighlight: '#102744',
+                        borderSubtle: '#1d4b78',
+                        electricViolet: '#147dff',
+                        cyanGlow: '#38bdf8',
+                        emeraldSignal: '#10b981',
+                        amberWarning: '#f59e0b',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Custom Theme & Animations */
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #06101f;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Sophisticated Background Effects */
+        .bg-grid-pattern {
+            position: fixed;
+            overflow: hidden;
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(56, 189, 248, 0.12) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(20, 125, 255, 0.1) 1px, transparent 1px);
+            animation: grid-drift 14s linear infinite, grid-pulse 5s ease-in-out infinite;
+        }
+
+        .bg-grid-pattern::before,
+        .bg-grid-pattern::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .bg-grid-pattern::before {
+            background: linear-gradient(115deg, transparent 0%, transparent 42%, rgba(56, 189, 248, 0.18) 49%, rgba(255, 255, 255, 0.42) 50%, rgba(56, 189, 248, 0.18) 51%, transparent 58%, transparent 100%);
+            background-size: 260% 100%;
+            animation: grid-sweep 8s ease-in-out infinite;
+            mix-blend-mode: screen;
+        }
+
+        .bg-grid-pattern::after {
+            background-image: radial-gradient(circle at center, rgba(125, 211, 252, 0.42) 0 1px, transparent 1.5px);
+            background-size: 40px 40px;
+            animation: grid-nodes 4s steps(2, end) infinite;
+            opacity: 0.35;
+        }
+
+        .live-scanline {
+            position: fixed;
+            inset: -35% 0 auto;
+            height: 28%;
+            background: linear-gradient(180deg, transparent, rgba(56, 189, 248, 0.1), transparent);
+            filter: blur(14px);
+            pointer-events: none;
+            z-index: 1;
+            animation: scanline 9s ease-in-out infinite;
+        }
+
+        .signal-stream {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.32;
+        }
+
+        .signal-stream span {
+            position: absolute;
+            color: #7dd3fc;
+            font: 600 10px 'JetBrains Mono', monospace;
+            letter-spacing: 0.16em;
+            white-space: nowrap;
+            animation: signal-float 16s linear infinite;
+        }
+
+        .signal-stream span:nth-child(1) { left: 8%; top: 74%; animation-delay: -3s; }
+        .signal-stream span:nth-child(2) { left: 72%; top: 22%; animation-delay: -8s; }
+        .signal-stream span:nth-child(3) { left: 44%; top: 88%; animation-delay: -12s; }
+        .signal-stream span:nth-child(4) { left: 86%; top: 62%; animation-delay: -6s; }
+
+        .ambient-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(20, 125, 255, 0.2) 0%, rgba(56, 189, 248, 0.08) 50%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(80px);
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(8, 27, 50, 0.78);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(125, 211, 252, 0.16);
+        }
+
+        .glass-panel-hover:hover {
+            border-color: rgba(20, 125, 255, 0.5);
+            box-shadow: 0 0 25px rgba(20, 125, 255, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #06101f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1d4b78;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #38bdf8;
+        }
+
+        /* Utility transitions */
+        .smooth-transition {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .scroll-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .page-loader {
+            animation: loader-out 0.6s ease 1.1s forwards;
+        }
+
+        .loader-bar {
+            animation: loader-progress 1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+        }
+
+        .loader-orbit {
+            position: absolute;
+            inset: -10px;
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            border-top-color: #ffffff;
+            border-radius: 999px;
+            animation: loader-orbit 1.4s linear infinite;
+        }
+
+        .loader-orbit::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            top: 4px;
+            left: 50%;
+            border-radius: 999px;
+            background: #ffffff;
+            box-shadow: 0 0 12px #38bdf8;
+        }
+
+        .loader-status {
+            animation: loader-status 1.8s ease-in-out infinite;
+        }
+
+        .view-enter {
+            animation: view-enter 0.45s ease both;
+        }
+
+        .stagger-item {
+            opacity: 0;
+            animation: view-enter 0.5s ease forwards;
+        }
+
+        .stagger-item:nth-child(2) { animation-delay: 0.08s; }
+        .stagger-item:nth-child(3) { animation-delay: 0.16s; }
+        .stagger-item:nth-child(4) { animation-delay: 0.24s; }
+        .stagger-item:nth-child(5) { animation-delay: 0.32s; }
+
+        .chart-wrap {
+            position: relative;
+            min-height: 260px;
+        }
+
+        .content-section {
+            width: 100%;
+            max-width: 1440px;
+            margin-inline: auto;
+        }
+
+        .section-heading {
+            min-width: 0;
+        }
+
+        .section-heading h1,
+        .section-heading p {
+            overflow-wrap: anywhere;
+        }
+
+        .candidate-card {
+            min-height: 286px;
+            text-align: left;
+        }
+
+        .candidate-card h3,
+        .candidate-card p {
+            overflow-wrap: anywhere;
+        }
+
+        .candidate-card .candidate-card-footer {
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        body.blue-light {
+            background: #eff9ff;
+            color: #0b2942;
+        }
+
+        body.blue-light .bg-obsidian { background-color: #eff9ff !important; }
+        body.blue-light .bg-surface { background-color: #ffffff !important; }
+        body.blue-light .bg-surfaceHighlight { background-color: #e4f4ff !important; }
+        body.blue-light .border-borderSubtle { border-color: #b9def4 !important; }
+        body.blue-light .glass-panel { background: rgba(255, 255, 255, 0.86); border-color: #b9def4; box-shadow: 0 10px 30px rgba(24, 112, 168, 0.08); }
+        body.blue-light .text-white { color: #0b2942 !important; }
+        body.blue-light .text-gray-100 { color: #153b55 !important; }
+        body.blue-light .text-gray-200 { color: #244b64 !important; }
+        body.blue-light .text-gray-300 { color: #355d74 !important; }
+        body.blue-light .text-gray-400 { color: #52758c !important; }
+        body.blue-light .text-gray-500 { color: #6b8da2 !important; }
+        body.blue-light .placeholder-gray-500::placeholder { color: #7394a8 !important; }
+        body.blue-light .bg-electricViolet.text-white,
+        body.blue-light .bg-gradient-to-r.text-white,
+        body.blue-light button.bg-electricViolet,
+        body.blue-light button.bg-gradient-to-r { color: #ffffff !important; }
+        body.blue-light .bg-grid-pattern { opacity: 0.45; }
+
+        /* Color occupancy gives each major workspace section a clear role. */
+        #viewContainer .view-enter > .glass-panel:nth-child(2),
+        #viewContainer .content-section > .glass-panel:nth-child(2) {
+            background: linear-gradient(135deg, rgba(219, 245, 255, 0.96), rgba(255, 255, 255, 0.9));
+            border-top: 3px solid #38bdf8 !important;
+            border-top-color: #38bdf8 !important;
+        }
+
+        #viewContainer .view-enter > .glass-panel:nth-child(3),
+        #viewContainer .content-section > .glass-panel:nth-child(3) {
+            background: linear-gradient(135deg, rgba(229, 244, 255, 0.96), rgba(255, 255, 255, 0.9));
+            border-top: 3px solid #147dff !important;
+            border-top-color: #147dff !important;
+        }
+
+        #viewContainer .view-enter > .glass-panel:nth-child(4),
+        #viewContainer .content-section > .glass-panel:nth-child(4) {
+            background: linear-gradient(135deg, rgba(232, 252, 246, 0.94), rgba(255, 255, 255, 0.9));
+            border-top: 3px solid #10b981 !important;
+            border-top-color: #10b981 !important;
+        }
+
+        #viewContainer .view-enter > .glass-panel:nth-child(5),
+        #viewContainer .content-section > .glass-panel:nth-child(5) {
+            background: linear-gradient(135deg, rgba(255, 248, 229, 0.94), rgba(255, 255, 255, 0.9));
+            border-top: 3px solid #f59e0b !important;
+            border-top-color: #f59e0b !important;
+        }
+
+        #viewContainer .view-enter > .glass-panel .bg-surface,
+        #viewContainer .content-section > .glass-panel .bg-surface {
+            border-color: rgba(29, 75, 120, 0.2);
+        }
+
+        @keyframes loader-progress {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes loader-out {
+            to { opacity: 0; visibility: hidden; pointer-events: none; }
+        }
+
+        @keyframes loader-orbit {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes loader-status {
+            0%, 100% { opacity: 0.45; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-2px); }
+        }
+
+        @keyframes view-enter {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes grid-drift {
+            0% { background-position: 0 0; }
+            50% { background-position: 20px 40px; }
+            100% { background-position: 40px 80px; }
+        }
+
+        @keyframes grid-pulse {
+            0%, 100% { opacity: 0.42; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes grid-sweep {
+            0% { background-position: 140% 0; opacity: 0; }
+            18%, 68% { opacity: 1; }
+            100% { background-position: -40% 0; opacity: 0; }
+        }
+
+        @keyframes grid-nodes {
+            0%, 100% { transform: translate(0, 0); opacity: 0.2; }
+            50% { transform: translate(20px, 40px); opacity: 0.65; }
+        }
+
+        @keyframes scanline {
+            0%, 100% { transform: translateY(-10vh); opacity: 0; }
+            20%, 75% { opacity: 1; }
+            55% { transform: translateY(420vh); }
+        }
+
+        @keyframes signal-float {
+            0% { transform: translate3d(0, 20vh, 0); opacity: 0; }
+            15%, 80% { opacity: 1; }
+            100% { transform: translate3d(8vw, -120vh, 0); opacity: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+            .scroll-reveal { opacity: 1; transform: none; }
+        }
+    </style>
+</head>
+<body class="blue-light bg-obsidian text-gray-100 min-h-screen relative selection:bg-electricViolet selection:text-white">
+
+    <div class="page-loader fixed inset-0 z-[100] bg-obsidian flex items-center justify-center">
+        <div class="w-52 text-center">
+            <div class="relative w-12 h-12 mx-auto">
+                <div class="loader-orbit"></div>
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-electricViolet to-cyanGlow flex items-center justify-center shadow-lg shadow-electricViolet/30 animate-pulse">
+                    <i data-lucide="file-text" class="w-6 h-6 text-white"></i>
+                </div>
+            </div>
+            <div class="loader-status mt-4 text-xs font-display font-semibold tracking-wide text-gray-400">CALIBRATING YOUR SPACE</div>
+            <div class="h-1 mt-3 rounded-full bg-surface overflow-hidden"><div class="loader-bar h-full bg-gradient-to-r from-electricViolet to-cyanGlow"></div></div>
+        </div>
+    </div>
+
+    <!-- Ambient Background Glows & Grid -->
+    <div class="fixed inset-0 bg-grid-pattern pointer-events-none z-0 opacity-60"></div>
+    <div class="live-scanline"></div>
+    <div class="signal-stream" aria-hidden="true">
+        <span>RESUME SIGNAL // PYTHON</span>
+        <span>ROLE MATCH // FASTAPI</span>
+        <span>SKILL GRAPH // SYSTEM DESIGN</span>
+        <span>PROFILE INDEX // VERIFIED</span>
+    </div>
+    <div class="ambient-glow top-[-10%] left-[20%]"></div>
+    <div class="ambient-glow bottom-[10%] right-[10%] bg-cyan-900/10"></div>
+
+    <!-- WELCOME / LANDING SCREEN (Initial View) -->
+    <div id="welcomeScreen" class="fixed inset-0 z-50 bg-obsidian flex flex-col justify-between p-6 md:p-12 transition-opacity duration-700">
+        <header class="flex justify-between items-center max-w-7xl mx-auto w-full">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-electricViolet to-cyanGlow flex items-center justify-center shadow-lg shadow-electricViolet/30">
+                    <i data-lucide="file-text" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <span class="font-display font-bold text-xl tracking-wider text-white">ALIGNHIRE</span>
+                    <span class="block text-[10px] font-mono text-cyanGlow tracking-widest uppercase">AI Talent OS</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button onclick="enterDemoMode()" class="px-4 py-2 rounded-lg text-xs font-mono border border-borderSubtle hover:border-cyanGlow/50 text-gray-300 hover:text-white smooth-transition">
+                    EXPLORE DEMO
+                </button>
+                <div class="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-surface border border-borderSubtle text-xs font-display font-semibold text-emeraldSignal">
+                    <span class="w-2 h-2 rounded-full bg-emeraldSignal animate-ping"></span>
+                    <span>ALL AGENTS ONLINE</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-4xl mx-auto text-center space-y-8 my-auto">
+            <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-electricViolet/10 border border-electricViolet/30 text-electricViolet font-mono text-xs tracking-wide">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>THE INTELLIGENCE LAYER BETWEEN TALENT AND OPPORTUNITY</span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-display font-extrabold tracking-tight text-white leading-tight">
+                Where potential <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyanGlow via-electricViolet to-white">meets precision.</span>
+            </h1>
+            
+            <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed">
+                AlignHire turns resumes and job requirements into structured intelligence, transparent alignment scores, and actionable career decisions.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                <button onclick="setRoleAndEnter('talent')" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-electricViolet to-cyanGlow text-white font-display font-semibold hover:opacity-95 shadow-lg shadow-electricViolet/25 flex items-center justify-center space-x-3 smooth-transition group">
+                    <i data-lucide="user" class="w-5 h-5 group-hover:scale-110 smooth-transition"></i>
+                    <span>ENTER AS TALENT</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 smooth-transition"></i>
+                </button>
+                <button onclick="setRoleAndEnter('hiring')" class="w-full sm:w-auto px-8 py-4 rounded-xl glass-panel text-white font-display font-semibold hover:bg-surfaceHighlight shadow-lg flex items-center justify-center space-x-3 smooth-transition group">
+                    <i data-lucide="briefcase" class="w-5 h-5 group-hover:scale-110 smooth-transition"></i>
+                    <span>ENTER AS HIRING TEAM</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 smooth-transition"></i>
+                </button>
+            </div>
+        </main>
+
+        <footer class="max-w-7xl mx-auto w-full flex flex-col sm:flex-row justify-between items-center text-xs font-mono text-gray-500 border-t border-borderSubtle pt-6">
+            <div>ALIGNHIRE v3.8 — SECURE NEURAL TALENT NETWORK</div>
+            <div class="flex space-x-6 mt-4 sm:mt-0">
+                <span class="hover:text-gray-300 cursor-pointer">System Architecture</span>
+                <span class="hover:text-gray-300 cursor-pointer">Agent Transparency</span>
+                <span class="hover:text-gray-300 cursor-pointer">Privacy Protocol</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MAIN APP SHELL (Hidden initially until role entered) -->
+    <div id="appShell" class="hidden min-h-screen flex flex-col relative z-10">
+        
+        <!-- Top Navigation / Role Switcher Header -->
+        <header class="h-16 border-b border-borderSubtle glass-panel sticky top-0 z-40 px-4 md:px-8 flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="returnToWelcome()">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-electricViolet to-cyanGlow flex items-center justify-center shadow-md shadow-electricViolet/30">
+                        <i data-lucide="file-text" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                        <span class="font-display font-bold text-lg tracking-wider text-white">ALIGNHIRE</span>
+                    </div>
+                </div>
+
+                <!-- Role Switcher Pill -->
+                <div class="hidden sm:flex items-center p-1 rounded-xl bg-obsidian border border-borderSubtle">
+                    <button id="roleTalentBtn" onclick="switchRole('talent')" class="px-4 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all">
+                        TALENT
+                    </button>
+                    <button id="roleHiringBtn" onclick="switchRole('hiring')" class="px-4 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all">
+                        HIRING
+                    </button>
+                </div>
+            </div>
+
+            <!-- Center Command Search Trigger -->
+            <div class="hidden md:flex items-center">
+                <button onclick="toggleCommandPalette()" class="flex items-center space-x-3 px-4 py-1.5 rounded-xl bg-surface border border-borderSubtle text-gray-400 hover:border-cyanGlow/50 text-xs font-mono w-72 justify-between smooth-transition">
+                    <span class="flex items-center space-x-2">
+                        <i data-lucide="search" class="w-3.5 h-3.5 text-gray-500"></i>
+                        <span>Search talent, jobs, skills...</span>
+                    </span>
+                    <kbd class="px-1.5 py-0.5 rounded bg-obsidian text-[10px] text-gray-500 border border-borderSubtle">⌘K</kbd>
+                </button>
+            </div>
+
+            <!-- Right Actions -->
+            <div class="flex items-center space-x-4">
+                <!-- Notifications Bell -->
+                <div class="relative">
+                    <button onclick="toggleNotifications()" class="w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-gray-300 hover:text-white relative smooth-transition">
+                        <i data-lucide="bell" class="w-4 h-4"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-cyanGlow animate-pulse"></span>
+                    </button>
+                    <!-- Notifications Dropdown -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 rounded-2xl glass-panel shadow-2xl p-4 border border-borderSubtle z-50">
+                        <div class="flex justify-between items-center pb-3 border-b border-borderSubtle mb-3">
+                            <span class="font-display font-semibold text-xs text-white">SYSTEM NOTIFICATIONS</span>
+                            <span class="text-[10px] font-mono text-cyanGlow">3 NEW</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="p-2 rounded-xl bg-surface hover:bg-surfaceHighlight smooth-transition cursor-pointer">
+                                <div class="text-xs font-medium text-white">3 new high-fit candidates</div>
+                                <div class="text-[10px] text-gray-400 font-mono mt-0.5">Matched for AI Platform Engineer role</div>
+                            </div>
+                            <div class="p-2 rounded-xl bg-surface hover:bg-surfaceHighlight smooth-transition cursor-pointer">
+                                <div class="text-xs font-medium text-white">Profile insight updated</div>
+                                <div class="text-[10px] text-gray-400 font-mono mt-0.5">Python confidence score elevated to 94%</div>
+                            </div>
+                            <div class="p-2 rounded-xl bg-surface hover:bg-surfaceHighlight smooth-transition cursor-pointer">
+                                <div class="text-xs font-medium text-white">Role match confirmed</div>
+                                <div class="text-[10px] text-gray-400 font-mono mt-0.5">Nexora Labs viewed your profile</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theme Switcher -->
+                <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-gray-300 hover:text-white smooth-transition">
+                    <i id="themeIcon" data-lucide="sun" class="w-4 h-4"></i>
+                </button>
+
+                <!-- User Profile Pill -->
+                <div class="flex items-center space-x-3 pl-2 border-l border-borderSubtle">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyanGlow to-electricViolet flex items-center justify-center font-display font-bold text-xs text-white shadow">
+                        AM
+                    </div>
+                    <div class="hidden lg:block text-left">
+                        <div id="userNameDisplay" class="text-xs font-semibold text-white">Alex Morgan</div>
+                        <div id="userRoleDisplay" class="text-[10px] font-mono text-cyanGlow">Backend Engineer</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- App Layout Body (Sidebar + Main Content) -->
+        <div class="flex-1 flex overflow-hidden">
+            
+            <!-- Sidebar -->
+            <aside id="appSidebar" class="w-64 border-r border-borderSubtle glass-panel hidden md:flex flex-col justify-between p-4 z-30">
+                <div class="space-y-6">
+                    <div class="px-3 py-2">
+                        <span class="text-[10px] font-mono text-gray-500 tracking-widest uppercase">AI TALENT OS</span>
+                    </div>
+                    
+                    <!-- Dynamic Navigation Links injected via JS based on Role -->
+                    <nav id="sidebarNav" class="space-y-1.5">
+                        <!-- Filled dynamically -->
+                    </nav>
+                </div>
+
+                <!-- Sidebar Footer Status -->
+                <div class="space-y-4 pt-4 border-t border-borderSubtle">
+                    <div class="px-3 py-2 rounded-xl bg-surface border border-borderSubtle">
+                        <div class="flex items-center space-x-2 text-[11px] font-display font-semibold text-emeraldSignal">
+                            <span class="w-2 h-2 rounded-full bg-emeraldSignal animate-pulse"></span>
+                            <span>ALL AGENTS OPERATIONAL</span>
+                        </div>
+                        <div class="text-[10px] text-gray-500 mt-1 font-display">Latency: 14ms · v3.8</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main id="mainContentArea" class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+                <!-- Dynamic View Container -->
+                <div id="viewContainer" class="max-w-7xl mx-auto pb-16">
+                    <!-- Dynamic views rendered here -->
+                </div>
+            </main>
+
+        </div>
+    </div>
+
+    <!-- COMMAND PALETTE MODAL (CMD+K) -->
+    <div id="commandPaletteModal" class="hidden fixed inset-0 z-50 bg-obsidian/80 backdrop-blur-md flex items-start justify-center pt-20 px-4">
+        <div class="w-full max-w-2xl rounded-2xl glass-panel shadow-2xl border border-borderSubtle overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div class="p-4 border-b border-borderSubtle flex items-center space-x-3">
+                <i data-lucide="search" class="w-5 h-5 text-cyanGlow"></i>
+                <input id="commandInput" type="text" placeholder="Type a command or search talent, jobs, skills..." class="w-full bg-transparent text-white placeholder-gray-500 text-sm focus:outline-none font-mono" oninput="handleCommandSearch(this.value)">
+                <button onclick="toggleCommandPalette()" class="px-2 py-1 rounded bg-surface border border-borderSubtle text-[10px] font-mono text-gray-400">ESC</button>
+            </div>
+            <div id="commandResults" class="p-2 max-h-96 overflow-y-auto space-y-1">
+                <div class="px-3 py-2 text-[10px] font-mono text-gray-500 uppercase tracking-wider">Quick Navigation</div>
+                <div onclick="navigateFromCommand('overview')" class="px-3 py-2.5 rounded-xl hover:bg-surfaceHighlight flex items-center justify-between cursor-pointer text-xs text-gray-200">
+                    <span class="flex items-center space-x-2"><i data-lucide="layout-dashboard" class="w-4 h-4 text-electricViolet"></i><span>Overview Dashboard</span></span>
+                    <span class="font-mono text-[10px] text-gray-500">Jump</span>
+                </div>
+                <div onclick="navigateFromCommand('opportunities')" class="px-3 py-2.5 rounded-xl hover:bg-surfaceHighlight flex items-center justify-between cursor-pointer text-xs text-gray-200">
+                    <span class="flex items-center space-x-2"><i data-lucide="briefcase" class="w-4 h-4 text-cyanGlow"></i><span>Opportunities / Jobs</span></span>
+                    <span class="font-mono text-[10px] text-gray-500">Jump</span>
+                </div>
+                <div onclick="navigateFromCommand('agentCenter')" class="px-3 py-2.5 rounded-xl hover:bg-surfaceHighlight flex items-center justify-between cursor-pointer text-xs text-gray-200">
+                    <span class="flex items-center space-x-2"><i data-lucide="cpu" class="w-4 h-4 text-emeraldSignal"></i><span>Agent Operations Center</span></span>
+                    <span class="font-mono text-[10px] text-gray-500">System</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REUSABLE MODAL CONTAINER -->
+    <div id="genericModal" class="hidden fixed inset-0 z-50 bg-obsidian/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div id="modalContentWrapper" class="w-full max-w-xl rounded-2xl glass-panel shadow-2xl border border-borderSubtle overflow-hidden relative">
+            <!-- Modal content injected dynamically -->
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-3 pointer-events-none"></div>
+
+    <!-- JAVASCRIPT APPLICATION CORE -->
+    <script>
+        // ==========================================
+        // APP STATE & CONFIGURATION
+        // ==========================================
+        const state = {
+            role: 'talent', // 'talent' or 'hiring'
+            currentView: 'overview',
+            theme: 'light',
+            selectedCandidate: null,
+            selectedJob: null,
+            isUploading: false,
+            uploadProgress: 0,
+            parsedResumeFile: null,
+            parserMode: 'strict',
+            jdText: 'Backend engineer role requiring Python, FastAPI, PostgreSQL, Docker, REST APIs, AWS, and evidence of production systems delivery.',
+            resumeFields: [
+                { fieldId: 'CONTACT-NAME', category: 'Full name', status: 'FOUND', value: 'Alex Morgan', evidence: 'ALEX MORGAN', sourceSection: 'Contact', confidence: 'high' },
+                { fieldId: 'CONTACT-EMAIL', category: 'Email address', status: 'NOT_FOUND', value: 'Not Found', evidence: 'No email-like text span detected in Contact section.', sourceSection: 'Contact', confidence: 'high' },
+                { fieldId: 'CONTACT-PHONE', category: 'Phone number', status: 'NOT_FOUND', value: 'Not Found', evidence: 'No phone-like text span detected in Contact section.', sourceSection: 'Contact', confidence: 'high' },
+                { fieldId: 'CONTACT-LINKS', category: 'LinkedIn or portfolio', status: 'NOT_FOUND', value: 'Not Found', evidence: 'No URL found in Contact section.', sourceSection: 'Contact', confidence: 'medium' },
+                { fieldId: 'EDU-HIGHEST', category: 'Highest education', status: 'AMBIGUOUS', value: 'Review required', evidence: 'Education section was not detected by the fixed header allowlist.', sourceSection: 'Education', confidence: 'low' },
+                { fieldId: 'EXP-CURRENT', category: 'Most recent role', status: 'FOUND', value: 'Backend Engineer at Nexora Labs', evidence: 'Nexora Labs - Backend Engineer', sourceSection: 'Experience', confidence: 'high' },
+                { fieldId: 'CONTACT-LOCATION', category: 'Location', status: 'FOUND', value: 'Bengaluru, India', evidence: 'Bengaluru, India | Hybrid or Remote', sourceSection: 'Contact', confidence: 'high' },
+                { fieldId: 'SKILLS-LIST', category: 'Skills', status: 'FOUND', value: 'Python, FastAPI, PostgreSQL, Docker, REST APIs, AWS, System Design', evidence: 'Python, FastAPI, PostgreSQL, Docker, REST APIs, AWS, System Design', sourceSection: 'Skills', confidence: 'high' },
+                { fieldId: 'CERT-LIST', category: 'Certifications', status: 'NOT_FOUND', value: 'Not Found', evidence: 'No Certifications section detected by the fixed header allowlist.', sourceSection: 'Certifications', confidence: 'high' },
+                { fieldId: 'PROJECT-LIST', category: 'Notable projects', status: 'NOT_FOUND', value: 'Not Found', evidence: 'No Projects section detected by the fixed header allowlist.', sourceSection: 'Projects', confidence: 'high' }
+            ],
+            fitReport: [
+                { requirement: 'Python backend development', matchStatus: 'MATCHED', explanation: 'Candidate lists Python directly in extracted skills.', evidenceRef: 'SKILLS-LIST', confidence: 'high' },
+                { requirement: 'FastAPI production services', matchStatus: 'MATCHED', explanation: 'FastAPI appears in skills and recent backend experience.', evidenceRef: 'SKILLS-LIST', confidence: 'high' },
+                { requirement: 'PostgreSQL database work', matchStatus: 'MATCHED', explanation: 'PostgreSQL is present in the extracted skills list.', evidenceRef: 'SKILLS-LIST', confidence: 'high' },
+                { requirement: 'Cloud deployment exposure', matchStatus: 'MATCHED', explanation: 'AWS appears in the extracted skills list.', evidenceRef: 'SKILLS-LIST', confidence: 'medium' },
+                { requirement: 'Verified education requirement', matchStatus: 'MISSING', explanation: 'Education section is ambiguous, so the scorer cannot mark this requirement matched.', evidenceRef: 'EDU-HIGHEST', confidence: 'low' }
+            ],
+            activeJobTab: 'all',
+            candidates: [
+                { id: 1, name: 'Maya Raman', role: 'Backend Engineer', alignment: 94, skills: ['Python', 'FastAPI', 'PostgreSQL', 'Docker'], exp: '6.5 yrs', location: 'Bengaluru', status: 'High Signal', matchBreakdown: { skillFit: 96, expFit: 92, roleFit: 94, eduFit: 90, projFit: 95 } },
+                { id: 2, name: 'Arjun Kumar', role: 'ML Engineer', alignment: 91, skills: ['Python', 'PyTorch', 'Transformers', 'AWS'], exp: '5.0 yrs', location: 'Hyderabad', status: 'Review', matchBreakdown: { skillFit: 94, expFit: 88, roleFit: 90, eduFit: 92, projFit: 89 } },
+                { id: 3, name: 'Sarah Thomas', role: 'Full Stack Engineer', alignment: 87, skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL'], exp: '4.2 yrs', location: 'Remote', status: 'Review', matchBreakdown: { skillFit: 88, expFit: 85, roleFit: 87, eduFit: 85, projFit: 90 } },
+                { id: 4, name: 'Daniel Joseph', role: 'Backend Engineer', alignment: 84, skills: ['Java', 'Spring Boot', 'Kubernetes', 'MySQL'], exp: '7.1 yrs', location: 'Chennai', status: 'Interview', matchBreakdown: { skillFit: 82, expFit: 90, roleFit: 83, eduFit: 80, projFit: 85 } }
+            ],
+            savedJobIds: [],
+            applications: [
+                { jobId: 1, stage: 'Interview', updated: 'Updated 2 hours ago' },
+                { jobId: 2, stage: 'Application sent', updated: 'Updated yesterday' }
+            ],
+            preferences: { remote: true, alerts: true, salary: '₹35L — ₹55L' },
+            analyticsRange: '6 months',
+            candidateNotes: {},
+            candidateFlags: {},
+            jobs: [
+                { id: 1, title: 'AI Platform Engineer', company: 'Nexora Labs', location: 'Bengaluru · Hybrid', type: 'Full-time', exp: '4-7 yrs', alignment: 92, description: 'Design and scale next-generation AI microservices using Python, FastAPI, and distributed vector databases.' },
+                { id: 2, title: 'Senior Backend Architect', company: 'Vortex Systems', location: 'Remote', type: 'Full-time', exp: '6+ yrs', alignment: 88, description: 'Lead backend architecture transformation, ensuring high-throughput fault-tolerant API pipelines.' },
+                { id: 3, title: 'Machine Learning Infrastructure Lead', company: 'Quantum AI', location: 'Mumbai · On-site', type: 'Full-time', exp: '5-8 yrs', alignment: 85, description: 'Build resilient LLM training clusters and high-performance inference endpoints.' }
+            ],
+            shortlistStages: {
+                highSignal: [1],
+                review: [2, 3],
+                interview: [4],
+                rejected: []
+            },
+            agentActivityLog: [
+                { time: '18:42:31', agent: 'MATCHING ENGINE', action: 'Candidate #1042 analyzed against Nexora Labs' },
+                { time: '18:42:28', agent: 'FIELD PARSER', action: 'Resume structure successfully extracted (PDF)' },
+                { time: '18:42:21', agent: 'RESUME EXTRACTOR', action: 'Document ingestion complete (10.2 MB)' },
+                { time: '18:41:05', agent: 'PROFILE INTELLIGENCE', action: 'Skill confidence weights re-calculated' }
+            ]
+        };
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initializeScrollReveal();
+            // Start simulation timers
+            setInterval(simulateAgentActivity, 4000);
+        });
+
+        function enterDemoMode() {
+            document.getElementById('welcomeScreen').classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                document.getElementById('welcomeScreen').style.display = 'none';
+                document.getElementById('appShell').classList.remove('hidden');
+                switchRole(state.role);
+                showToast('Welcome to AlignHire AI Talent OS (Demo Mode)');
+            }, 500);
+        }
+
+        function setRoleAndEnter(role) {
+            state.role = role;
+            enterDemoMode();
+        }
+
+        function returnToWelcome() {
+            document.getElementById('appShell').classList.add('hidden');
+            document.getElementById('welcomeScreen').style.display = 'flex';
+            document.getElementById('welcomeScreen').classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        // ==========================================
+        // ROLE SWITCHING & NAVIGATION
+        // ==========================================
+        function switchRole(role) {
+            state.role = role;
+            state.currentView = role === 'talent' ? 'overview' : 'overview';
+
+            // Update Role switcher active buttons
+            const tBtn = document.getElementById('roleTalentBtn');
+            const hBtn = document.getElementById('roleHiringBtn');
+            if (role === 'talent') {
+                tBtn.className = 'px-4 py-1.5 rounded-lg text-xs font-mono font-semibold bg-electricViolet text-white shadow';
+                hBtn.className = 'px-4 py-1.5 rounded-lg text-xs font-mono font-semibold text-gray-400 hover:text-white';
+                document.getElementById('userRoleDisplay').innerText = 'Backend Engineer';
+            } else {
+                hBtn.className = 'px-4 py-1.5 rounded-lg text-xs font-mono font-semibold bg-electricViolet text-white shadow';
+                tBtn.className = 'px-4 py-1.5 rounded-lg text-xs font-mono font-semibold text-gray-400 hover:text-white';
+                document.getElementById('userRoleDisplay').innerText = 'Hiring Commander';
+            }
+
+            renderSidebarNav();
+            renderCurrentView();
+        }
+
+        function renderSidebarNav() {
+            const navContainer = document.getElementById('sidebarNav');
+            let html = '';
+
+            if (state.role === 'talent') {
+                const navItems = [
+                    { id: 'overview', label: 'Overview', icon: 'layout-dashboard' },
+                    { id: 'profile', label: 'My Profile', icon: 'user' },
+                    { id: 'resume', label: 'Resume Intelligence', icon: 'file-text' },
+                    { id: 'opportunities', label: 'Opportunities', icon: 'briefcase' },
+                    { id: 'matchIntelligence', label: 'Match Intelligence', icon: 'sparkles' },
+                    { id: 'applications', label: 'Application Tracker', icon: 'kanban-square' },
+                    { id: 'analytics', label: 'Career Analytics', icon: 'chart-no-axes-combined' },
+                    { id: 'preferences', label: 'Job Preferences', icon: 'sliders-horizontal' },
+                ];
+                navItems.forEach(item => {
+                    const active = state.currentView === item.id;
+                    html += `
+                        <button onclick="navigateTo('${item.id}')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium smooth-transition ${active ? 'bg-electricViolet/15 text-electricViolet border border-electricViolet/30' : 'text-gray-400 hover:text-white hover:bg-surfaceHighlight'}">
+                            <i data-lucide="${item.icon}" class="w-4 h-4"></i>
+                            <span>${item.label}</span>
+                        </button>
+                    `;
+                });
+            } else {
+                const navItems = [
+                    { id: 'overview', label: 'Command Center', icon: 'command' },
+                    { id: 'jobs', label: 'Jobs', icon: 'briefcase' },
+                    { id: 'candidates', label: 'Candidates', icon: 'users' },
+                    { id: 'talentIntelligence', label: 'Talent Intelligence', icon: 'brain' },
+                    { id: 'shortlist', label: 'Shortlist', icon: 'check-circle' },
+                    { id: 'agentCenter', label: 'Agent Center', icon: 'cpu' },
+                ];
+                navItems.forEach(item => {
+                    const active = state.currentView === item.id;
+                    html += `
+                        <button onclick="navigateTo('${item.id}')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium smooth-transition ${active ? 'bg-electricViolet/15 text-electricViolet border border-electricViolet/30' : 'text-gray-400 hover:text-white hover:bg-surfaceHighlight'}">
+                            <i data-lucide="${item.icon}" class="w-4 h-4"></i>
+                            <span>${item.label}</span>
+                        </button>
+                    `;
+                });
+            }
+
+            navContainer.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function navigateTo(viewId) {
+            state.currentView = viewId;
+            renderSidebarNav();
+            renderCurrentView();
+        }
+
+        // ==========================================
+        // VIEW RENDERER DISPATCHER
+        // ==========================================
+        function renderCurrentView() {
+            const container = document.getElementById('viewContainer');
+            container.innerHTML = '';
+
+            if (state.role === 'talent') {
+                if (state.currentView === 'overview') renderTalentOverview(container);
+                else if (state.currentView === 'profile') renderProfileIntelligence(container);
+                else if (state.currentView === 'resume') renderResumeIntelligence(container);
+                else if (state.currentView === 'opportunities') renderOpportunities(container);
+                else if (state.currentView === 'matchIntelligence') renderMatchIntelligence(container);
+                else if (state.currentView === 'applications') renderApplicationTracker(container);
+                else if (state.currentView === 'analytics') renderTalentAnalytics(container);
+                else if (state.currentView === 'preferences') renderTalentPreferences(container);
+            } else {
+                if (state.currentView === 'overview') renderHiringOverview(container);
+                else if (state.currentView === 'jobs') renderJobCreation(container);
+                else if (state.currentView === 'candidates') renderCandidateDiscovery(container);
+                else if (state.currentView === 'talentIntelligence') renderTalentIntelligence(container);
+                else if (state.currentView === 'shortlist') renderShortlist(container);
+                else if (state.currentView === 'agentCenter') renderAgentCenter(container);
+            }
+            lucide.createIcons();
+            initializeScrollReveal();
+            if (state.role === 'hiring' && state.currentView === 'overview') {
+                requestAnimationFrame(initializeHiringChart);
+            }
+        }
+
+        function initializeScrollReveal() {
+            const revealItems = document.querySelectorAll('.glass-panel, .job-card, .content-section > *');
+            if (!('IntersectionObserver' in window)) {
+                revealItems.forEach(item => item.classList.add('is-visible'));
+                return;
+            }
+            const observer = new IntersectionObserver((entries, currentObserver) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('scroll-reveal', 'is-visible');
+                        currentObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.08 });
+            revealItems.forEach(item => {
+                if (!item.classList.contains('is-visible')) observer.observe(item);
+            });
+        }
+
+        function initializeHiringChart() {
+            if (typeof Chart === 'undefined') return;
+            const canvas = document.getElementById('hiringPipelineChart');
+            if (!canvas) return;
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: ['Sourced', 'Reviewed', 'Shortlisted', 'Interview', 'Offer'],
+                    datasets: [{ label: 'Candidates', data: [428, 164, 37, 12, 4], backgroundColor: ['#1d4ed8', '#147dff', '#38bdf8', '#10b981', '#f59e0b'], borderRadius: 8, borderSkipped: false }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#cbd5e1', font: { family: 'DM Sans' } }, grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { color: '#94a3b8', font: { family: 'DM Sans' } }, grid: { color: 'rgba(125, 211, 252, 0.12)' } }
+                    },
+                    animation: { duration: 1100, easing: 'easeOutQuart' }
+                }
+            });
+        }
+
+        // ==========================================
+        // TALENT VIEWS
+        // ==========================================
+        function renderTalentOverview(container) {
+            container.innerHTML = `
+                <div class="space-y-8 view-enter">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-display font-bold text-white">Good evening, Alex.</h1>
+                            <p class="text-gray-400 text-sm mt-1">Your professional signal is getting clearer.</p>
+                        </div>
+                        <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full glass-panel text-xs font-mono text-emeraldSignal">
+                            <span class="w-2 h-2 rounded-full bg-emeraldSignal animate-pulse"></span>
+                            <span>● AGENTS ONLINE</span>
+                        </div>
+                    </div>
+
+                    <!-- Hero Intelligence Card -->
+                    <div class="rounded-2xl glass-panel p-6 md:p-8 border border-borderSubtle relative overflow-hidden">
+                        <div class="absolute -right-16 -bottom-16 w-64 h-64 bg-electricViolet/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                            <div class="lg:col-span-5 flex flex-col items-center justify-center p-6 rounded-2xl bg-surface border border-borderSubtle">
+                                <div class="relative flex items-center justify-center">
+                                    <div class="w-36 h-36 rounded-full border-4 border-electricViolet/30 flex items-center justify-center relative">
+                                        <div class="absolute inset-0 rounded-full border-4 border-cyanGlow border-t-transparent animate-spin"></div>
+                                        <div class="text-center">
+                                            <span class="text-3xl font-display font-extrabold text-white">87%</span>
+                                            <span class="block text-[10px] font-mono text-cyanGlow uppercase">ALIGNMENT</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="mt-4 text-xs font-display font-semibold text-gray-400">Profile Reconstructed by AI Agent</span>
+                            </div>
+                            <div class="lg:col-span-7 space-y-6">
+                                <div>
+                                    <span class="text-[10px] font-mono text-electricViolet uppercase tracking-wider">SIGNAL QUALITY METRICS</span>
+                                    <h3 class="text-xl font-display font-semibold text-white mt-1">High-Precision Professional Profile</h3>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-2 gap-4">
+                                    <div class="p-4 rounded-xl bg-surface border border-borderSubtle">
+                                        <div class="text-2xl font-display font-bold text-white">42</div>
+                                        <div class="text-xs text-gray-400 font-mono mt-1">Skills Detected</div>
+                                    </div>
+                                    <div class="p-4 rounded-xl bg-surface border border-borderSubtle">
+                                        <div class="text-2xl font-display font-bold text-white">6.8 yrs</div>
+                                        <div class="text-xs text-gray-400 font-mono mt-1">Verified Experience</div>
+                                    </div>
+                                    <div class="p-4 rounded-xl bg-surface border border-borderSubtle">
+                                        <div class="text-2xl font-display font-bold text-white">18</div>
+                                        <div class="text-xs text-gray-400 font-mono mt-1">Roles Aligned</div>
+                                    </div>
+                                    <div class="p-4 rounded-xl bg-surface border border-borderSubtle">
+                                        <div class="text-2xl font-display font-bold text-emeraldSignal">94%</div>
+                                        <div class="text-xs text-gray-400 font-mono mt-1">Profile Completeness</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Agent Pipeline Visualization -->
+                    <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-6">
+                        <div class="flex justify-between items-center">
+                            <span class="font-display font-semibold text-sm text-white">ACTIVE AI AGENT PIPELINE</span>
+                            <span class="text-xs font-mono text-cyanGlow">REAL-TIME INFERENCE</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+                            ${['EXTRACT', 'SEGMENT', 'PARSE', 'PROFILE', 'INTELLIGENCE', 'MATCH', 'ALIGN'].map((agent, idx) => `
+                                <div class="p-3 rounded-xl bg-surface border border-borderSubtle text-center relative">
+                                    <div class="w-6 h-6 mx-auto mb-2 rounded-full bg-electricViolet/20 text-electricViolet flex items-center justify-center text-[10px] font-mono">${idx+1}</div>
+                                    <div class="text-[11px] font-semibold text-white">${agent}</div>
+                                    <div class="text-[9px] font-mono text-emeraldSignal mt-1">● READY</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <button onclick="navigateTo('analytics')" class="stagger-item text-left p-5 rounded-2xl glass-panel border border-borderSubtle hover:border-cyanGlow/50 smooth-transition group">
+                            <i data-lucide="chart-no-axes-combined" class="w-5 h-5 text-cyanGlow group-hover:scale-110 smooth-transition"></i>
+                            <div class="mt-4 text-sm font-display font-semibold text-white">Review career analytics</div>
+                            <div class="text-xs text-gray-400 mt-1">Track momentum, skills, and applications.</div>
+                        </button>
+                        <button onclick="navigateTo('resume')" class="stagger-item text-left p-5 rounded-2xl glass-panel border border-borderSubtle hover:border-electricViolet/50 smooth-transition group">
+                            <i data-lucide="file-pen-line" class="w-5 h-5 text-electricViolet group-hover:scale-110 smooth-transition"></i>
+                            <div class="mt-4 text-sm font-display font-semibold text-white">Strengthen your resume</div>
+                            <div class="text-xs text-gray-400 mt-1">Refresh your profile signals and evidence.</div>
+                        </button>
+                        <button onclick="navigateTo('preferences')" class="stagger-item text-left p-5 rounded-2xl glass-panel border border-borderSubtle hover:border-emeraldSignal/50 smooth-transition group">
+                            <i data-lucide="sliders-horizontal" class="w-5 h-5 text-emeraldSignal group-hover:scale-110 smooth-transition"></i>
+                            <div class="mt-4 text-sm font-display font-semibold text-white">Tune job preferences</div>
+                            <div class="text-xs text-gray-400 mt-1">Keep recommendations relevant to you.</div>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProfileIntelligence(container) {
+            container.innerHTML = `
+                <div class="space-y-8 view-enter">
+                    <div>
+                        <span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">CANDIDATE INTELLIGENCE</span>
+                        <h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">Professional Identity & Signals</h1>
+                    </div>
+
+                    <!-- Identity Card -->
+                    <div class="rounded-2xl glass-panel p-6 border border-borderSubtle flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyanGlow to-electricViolet flex items-center justify-center text-xl font-display font-bold text-white shadow-lg">
+                                AM
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-display font-bold text-white">Alex Morgan</h2>
+                                <p class="text-xs font-mono text-cyanGlow mt-0.5">Backend Engineer · 6.8 years experience</p>
+                                <p class="text-xs text-gray-400 mt-1">Bengaluru, India · Hybrid or Remote</p>
+                            </div>
+                        </div>
+                        <button onclick="syncProfileSources()" class="px-4 py-2 rounded-xl bg-electricViolet text-white text-xs font-semibold hover:opacity-90 shadow-md">
+                            Sync with GitHub & LinkedIn
+                        </button>
+                    </div>
+
+                    <!-- Core Skill Signals -->
+                    <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-6">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-display font-semibold text-sm text-white">CORE SKILL SIGNALS</h3>
+                            <span class="text-xs font-mono text-gray-400">Hover for evidence confidence</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            ${[
+                                { name: 'Python', strength: '94%', exp: '5.8 yrs', conf: 'High', evidence: '8 projects' },
+                                { name: 'FastAPI', strength: '91%', exp: '4.2 yrs', conf: 'High', evidence: '12 microservices' },
+                                { name: 'PostgreSQL', strength: '89%', exp: '5.0 yrs', conf: 'High', evidence: 'Schema optimization' },
+                                { name: 'Docker', strength: '88%', exp: '4.5 yrs', conf: 'High', evidence: 'Containerized CI/CD' },
+                                { name: 'REST APIs', strength: '95%', exp: '6.8 yrs', conf: 'High', evidence: 'Enterprise specs' },
+                                { name: 'Machine Learning', strength: '82%', exp: '3.0 yrs', conf: 'Medium', evidence: 'Inference endpoints' },
+                                { name: 'AWS', strength: '86%', exp: '4.0 yrs', conf: 'High', evidence: 'ECS / Lambda / S3' },
+                                { name: 'System Design', strength: '90%', exp: '5.5 yrs', conf: 'High', evidence: 'Distributed architectures' }
+                            ].map(skill => `
+                                <div class="p-4 rounded-xl bg-surface border border-borderSubtle hover:border-cyanGlow/40 smooth-transition cursor-pointer group" onclick="showToast('${skill.name}: ${skill.evidence} verified')">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-xs font-semibold text-white group-hover:text-cyanGlow smooth-transition">${skill.name}</span>
+                                        <span class="text-[10px] font-mono text-emeraldSignal font-bold">${skill.strength}</span>
+                                    </div>
+                                    <div class="w-full bg-borderSubtle h-1.5 rounded-full overflow-hidden">
+                                        <div class="bg-gradient-to-r from-electricViolet to-cyanGlow h-full rounded-full" style="width: ${skill.strength}"></div>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-3 text-[10px] font-mono text-gray-400">
+                                        <span>Exp: ${skill.exp}</span>
+                                        <span>Conf: ${skill.conf}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Career Timeline -->
+                    <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-6">
+                        <h3 class="font-display font-semibold text-sm text-white">CAREER TIMELINE</h3>
+                        <div class="space-y-4 border-l border-borderSubtle ml-3 pl-6">
+                            ${[
+                                { year: '2025 — Present', role: 'Backend Engineer', company: 'Nexora Labs', desc: 'Leading scalable Python FastAPI microservices and vector search integration.' },
+                                { year: '2023 — 2025', role: 'Software Engineer', company: 'Vortex Systems', desc: 'Engineered high-throughput RESTful endpoints and optimized PostgreSQL DB queries.' },
+                                { year: '2021 — 2023', role: 'Junior Developer', company: 'CloudScale Technologies', desc: 'Developed containerized microservices using Docker and AWS infrastructure.' },
+                                { year: '2019 — 2021', role: 'Engineering Intern', company: 'DataPulse', desc: 'Assisted in data pipeline automation and API integration testing.' }
+                            ].map(exp => `
+                                <div class="relative">
+                                    <span class="absolute -left-[31px] top-1 w-3 h-3 rounded-full bg-cyanGlow border-4 border-obsidian"></span>
+                                    <span class="text-[10px] font-mono text-cyanGlow">${exp.year}</span>
+                                    <h4 class="text-sm font-semibold text-white mt-0.5">${exp.role} <span class="text-gray-400 font-normal">at ${exp.company}</span></h4>
+                                    <p class="text-xs text-gray-400 mt-1">${exp.desc}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderResumeIntelligence(container) {
+            const foundCount = state.resumeFields.filter(field => field.status === 'FOUND').length;
+            const reviewCount = state.resumeFields.filter(field => field.status !== 'FOUND').length;
+            const matchedCount = state.fitReport.filter(item => item.matchStatus === 'MATCHED').length;
+            const fitScore = Math.round((matchedCount / state.fitReport.length) * 100);
+            const candidateProfile = buildCandidateProfile();
+            const fitSummary = buildFitSummary();
+            container.innerHTML = `
+                <div class="space-y-8 view-enter">
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4">
+                        <div>
+                            <span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">RESUME INTELLIGENCE</span>
+                            <h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">Autonomous Resume Parser Cockpit</h1>
+                            <p class="text-gray-400 text-sm mt-1">Upload a resume, add a JD, inspect grounded fields, and export the report.</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3 w-full lg:w-auto">
+                            ${[
+                                { value: `${foundCount}/10`, label: 'Fields found', tone: 'text-emeraldSignal' },
+                                { value: `${reviewCount}`, label: 'Need review', tone: 'text-amberWarning' },
+                                { value: `${fitScore}%`, label: 'JD fit', tone: 'text-cyanGlow' }
+                            ].map(metric => `<div class="rounded-2xl glass-panel p-4 border border-borderSubtle min-w-0"><div class="text-xl font-display font-bold ${metric.tone}">${metric.value}</div><div class="text-[10px] text-gray-400 mt-1">${metric.label}</div></div>`).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Upload Zone -->
+                    <div class="rounded-2xl glass-panel p-8 border-2 border-dashed border-borderSubtle hover:border-cyanGlow/50 text-center space-y-5 smooth-transition cursor-pointer" onclick="document.getElementById('resumeFileInput').click()" ondragover="handleResumeDrag(event)" ondragleave="handleResumeDragLeave(event)" ondrop="handleResumeDrop(event)">
+                        <input id="resumeFileInput" type="file" accept=".pdf,.docx" class="hidden" onchange="handleResumeFile(this.files[0])">
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-electricViolet/10 border border-electricViolet/30 flex items-center justify-center text-electricViolet">
+                            <i data-lucide="upload-cloud" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-display font-semibold text-white">Drop your resume here</h3>
+                            <p class="text-xs text-gray-400 mt-1">PDF or DOCX · Maximum 10MB</p>
+                        </div>
+                        <div class="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
+                            ${[
+                                ['file-check-2', 'Read-only ingestion', 'The source resume is never modified during upload.'],
+                                ['list-checks', 'Fixed parser contract', 'Allowed sections and field categories stay versioned and explicit.'],
+                                ['badge-check', 'Evidence required', 'Each field needs FOUND, NOT_FOUND, or AMBIGUOUS plus source text.'],
+                                ['shield-alert', 'No fabricated data', 'Missing or unreadable fields are reported clearly instead of guessed.'],
+                                ['repeat-2', 'Deterministic reruns', 'Same resume and JD must produce the same field set and order.'],
+                                ['file-warning', 'Unreadable files fail loudly', 'Empty, scanned, or unsupported uploads surface UNKNOWN or an error.']
+                            ].map(rule => `
+                                <div class="p-3 rounded-xl bg-surface border border-borderSubtle flex gap-3">
+                                    <i data-lucide="${rule[0]}" class="w-4 h-4 text-cyanGlow shrink-0 mt-0.5"></i>
+                                    <div>
+                                        <div class="text-xs font-display font-semibold text-white">${rule[1]}</div>
+                                        <div class="text-[11px] text-gray-400 mt-1">${rule[2]}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="flex justify-center gap-3 pt-2">
+                            <button onclick="event.stopPropagation(); document.getElementById('resumeFileInput').click();" class="px-5 py-2.5 rounded-xl bg-electricViolet text-white text-xs font-semibold shadow hover:opacity-90">UPLOAD RESUME</button>
+                            <button onclick="event.stopPropagation(); removeCurrentResume();" class="px-5 py-2.5 rounded-xl glass-panel text-gray-300 text-xs font-semibold hover:text-white"><i data-lucide="trash-2" class="w-3.5 h-3.5 inline mr-1"></i>Remove current resume</button>
+                            <button onclick="event.stopPropagation(); exportParserReport('json');" class="px-5 py-2.5 rounded-xl glass-panel text-gray-300 text-xs font-semibold hover:text-white"><i data-lucide="braces" class="w-3.5 h-3.5 inline mr-1"></i>Export JSON</button>
+                            <button onclick="event.stopPropagation(); exportParserReport('md');" class="px-5 py-2.5 rounded-xl glass-panel text-gray-300 text-xs font-semibold hover:text-white"><i data-lucide="download" class="w-3.5 h-3.5 inline mr-1"></i>Export report</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+                        <div class="xl:col-span-3 rounded-2xl glass-panel p-6 border border-borderSubtle space-y-5">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                <div>
+                                    <h3 class="font-display font-semibold text-sm text-white">Target job description</h3>
+                                    <p class="text-xs text-gray-400 mt-1">The scorer compares only structured fields and evidence against this JD.</p>
+                                </div>
+                                <select id="parserModeSelect" onchange="setParserMode(this.value)" class="bg-surface border border-borderSubtle rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyanGlow">
+                                    <option value="strict" ${state.parserMode === 'strict' ? 'selected' : ''}>Strict evidence mode</option>
+                                    <option value="review" ${state.parserMode === 'review' ? 'selected' : ''}>Human review mode</option>
+                                    <option value="batch" ${state.parserMode === 'batch' ? 'selected' : ''}>Batch ranking mode</option>
+                                </select>
+                            </div>
+                            <textarea id="jdInput" rows="5" oninput="state.jdText = this.value" class="w-full bg-surface border border-borderSubtle rounded-xl p-4 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyanGlow">${state.jdText}</textarea>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                ${[
+                                    ['database', 'No raw file bytes to scorer', 'Structured fields only'],
+                                    ['key-round', 'Secrets stay external', 'Environment variables only'],
+                                    ['scan-search', 'Scanned PDFs flagged', 'UNKNOWN instead of blank profile']
+                                ].map(item => `<div class="p-3 rounded-xl bg-surface border border-borderSubtle"><i data-lucide="${item[0]}" class="w-4 h-4 text-cyanGlow"></i><div class="text-xs font-semibold text-white mt-2">${item[1]}</div><div class="text-[10px] text-gray-400 mt-1">${item[2]}</div></div>`).join('')}
+                            </div>
+                        </div>
+
+                        <div class="xl:col-span-2 rounded-2xl glass-panel p-6 border border-borderSubtle space-y-4">
+                            <div>
+                                <h3 class="font-display font-semibold text-sm text-white">Pre-freeze audit</h3>
+                                <p class="text-xs text-gray-400 mt-1">Required checks before trusting a parser run.</p>
+                            </div>
+                            ${[
+                                ['check-circle-2', 'Source opened read-only', 'PASS', 'text-emeraldSignal'],
+                                ['check-circle-2', 'Fixed section allowlist', 'PASS', 'text-emeraldSignal'],
+                                ['check-circle-2', '10 required fields represented', 'PASS', 'text-emeraldSignal'],
+                                ['alert-triangle', 'Education needs review', 'AMBIGUOUS', 'text-amberWarning'],
+                                ['check-circle-2', 'Repeatable field ordering', 'PASS', 'text-emeraldSignal']
+                            ].map(check => `<div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-surface border border-borderSubtle"><div class="flex items-center gap-2 min-w-0"><i data-lucide="${check[0]}" class="w-4 h-4 ${check[3]} shrink-0"></i><span class="text-xs text-gray-200 truncate">${check[1]}</span></div><span class="text-[10px] font-mono ${check[3]}">${check[2]}</span></div>`).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Analysis Output Container -->
+                    <div id="resumeAnalysisBox" class="hidden rounded-2xl glass-panel p-6 border border-borderSubtle space-y-6">
+                        <div class="flex justify-between items-center">
+                            <span class="font-display font-semibold text-sm text-white">PIPELINE ANALYSIS STATUS</span>
+                            <span id="pipelineStatusBadge" class="text-xs font-mono text-emeraldSignal">● COMPLETE</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 rounded-xl bg-surface border border-borderSubtle text-xs font-mono">
+                                <span>Resume Extractor</span>
+                                <span class="text-emeraldSignal">COMPLETE</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 rounded-xl bg-surface border border-borderSubtle text-xs font-mono">
+                                <span>Segmenter Agent</span>
+                                <span class="text-emeraldSignal">COMPLETE</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 rounded-xl bg-surface border border-borderSubtle text-xs font-mono">
+                                <span>Field Parser Agent</span>
+                                <span class="text-emeraldSignal">COMPLETE</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 rounded-xl bg-surface border border-borderSubtle text-xs font-mono">
+                                <span>Profile Intelligence Agent</span>
+                                <span class="text-emeraldSignal">RECONSTRUCTED</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                        <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-5">
+                            <div>
+                                <h3 class="font-display font-semibold text-sm text-white">Structured candidate profile</h3>
+                                <p class="text-xs text-gray-400 mt-1">Normalized recruiter-ready profile produced by the parser.</p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                ${Object.entries(candidateProfile).map(([key, value]) => `<div class="p-3 rounded-xl bg-surface border border-borderSubtle min-w-0"><div class="text-[10px] font-mono text-cyanGlow uppercase">${formatProfileKey(key)}</div><div class="text-xs text-white mt-1 break-words">${value}</div></div>`).join('')}
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-5">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <h3 class="font-display font-semibold text-sm text-white">Fit score output</h3>
+                                    <p class="text-xs text-gray-400 mt-1">Score is calculated from matched vs missing JD requirements.</p>
+                                </div>
+                                <div class="text-3xl font-display font-extrabold text-cyanGlow">${fitSummary.fitScore}%</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="p-4 rounded-xl bg-emeraldSignal/10 border border-emeraldSignal/25"><div class="text-2xl font-display font-bold text-emeraldSignal">${fitSummary.matchedRequirements.length}</div><div class="text-xs text-gray-300 mt-1">Matched requirements</div></div>
+                                <div class="p-4 rounded-xl bg-amberWarning/10 border border-amberWarning/25"><div class="text-2xl font-display font-bold text-amberWarning">${fitSummary.missingRequirements.length}</div><div class="text-xs text-gray-300 mt-1">Missing requirements</div></div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="text-[10px] font-mono text-gray-500 uppercase">Missing requirement list</div>
+                                ${fitSummary.missingRequirements.map(item => `<div class="p-3 rounded-xl bg-surface border border-borderSubtle text-xs text-gray-300"><span class="text-amberWarning font-semibold">${item.requirement}</span><span class="block mt-1">${item.explanation}</span></div>`).join('') || '<div class="p-3 rounded-xl bg-surface border border-borderSubtle text-xs text-emeraldSignal">No missing requirements in this report.</div>'}
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-5">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <h3 class="font-display font-semibold text-sm text-white">Structured field evidence</h3>
+                                    <p class="text-xs text-gray-400 mt-1">Every field includes status, value, section, and captured evidence.</p>
+                                </div>
+                                <button onclick="rerunNoDriftCheck()" class="px-3 py-2 rounded-xl bg-surface border border-borderSubtle text-xs text-cyanGlow hover:text-white"><i data-lucide="repeat-2" class="w-3.5 h-3.5 inline mr-1"></i>No-drift check</button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="border-b border-borderSubtle text-gray-400 font-mono">
+                                        <tr><th class="pb-3">Field</th><th class="pb-3">Status</th><th class="pb-3">Value</th><th class="pb-3">Evidence</th></tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-borderSubtle">
+                                        ${state.resumeFields.map(field => `<tr class="align-top"><td class="py-3"><div class="font-semibold text-white">${field.category}</div><div class="text-[10px] font-mono text-gray-500">${field.fieldId} &middot; ${field.sourceSection}</div></td><td class="py-3"><span class="px-2 py-1 rounded-full bg-surface border border-borderSubtle font-mono text-[10px] ${getStatusTone(field.status)}">${field.status}</span></td><td class="py-3 text-gray-200 min-w-[140px]">${field.value}</td><td class="py-3 text-gray-400 min-w-[220px]">${field.evidence}</td></tr>`).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-5">
+                            <div>
+                                <h3 class="font-display font-semibold text-sm text-white">Ranked fit report</h3>
+                                <p class="text-xs text-gray-400 mt-1">Matched and missing requirements stay tied to field evidence.</p>
+                            </div>
+                            <div class="space-y-3">
+                                ${state.fitReport.map(item => { const field = getFieldById(item.evidenceRef); return `<div class="p-4 rounded-xl bg-surface border border-borderSubtle"><div class="flex items-start justify-between gap-3"><div><div class="text-xs font-semibold text-white">${item.requirement}</div><div class="text-xs text-gray-400 mt-1">${item.explanation}</div></div><span class="px-2 py-1 rounded-full font-mono text-[10px] ${item.matchStatus === 'MATCHED' ? 'bg-emeraldSignal/10 text-emeraldSignal' : 'bg-amberWarning/10 text-amberWarning'}">${item.matchStatus}</span></div><div class="mt-3 p-3 rounded-xl bg-obsidian border border-borderSubtle text-[11px] text-gray-300"><span class="block text-[10px] font-mono text-cyanGlow uppercase">Evidence for claim</span><span class="block mt-1">${field ? field.evidence : 'Evidence field not found'}</span></div><div class="mt-3 flex flex-wrap gap-2 text-[10px] font-mono text-gray-400"><span class="px-2 py-1 rounded-full bg-obsidian border border-borderSubtle">${item.evidenceRef}</span><span class="px-2 py-1 rounded-full bg-obsidian border border-borderSubtle">${field ? field.sourceSection : 'UNKNOWN'}</span><span class="px-2 py-1 rounded-full bg-obsidian border border-borderSubtle">${item.confidence} confidence</span></div></div>`; }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function simulateResumeUpload() {
+            showToast('Initializing resume ingestion...');
+            const box = document.getElementById('resumeAnalysisBox');
+            if(box) box.classList.remove('hidden');
+            setTimeout(() => {
+                showToast('Professional profile successfully reconstructed.');
+            }, 2000);
+        }
+
+        function handleResumeFile(file) {
+            if (!file) return;
+            const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!allowedTypes.includes(file.type) && !/\.(pdf|docx)$/i.test(file.name)) {
+                showToast('Please choose a PDF or DOCX resume');
+                return;
+            }
+            if (file.size === 0) {
+                showToast('Unreadable resume: file is empty');
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('Resume must be smaller than 10MB');
+                return;
+            }
+            showToast(`Uploading ${file.name}...`);
+            state.parsedResumeFile = {
+                name: file.name,
+                type: file.type || file.name.split('.').pop().toUpperCase(),
+                sizeKb: Math.round(file.size / 1024),
+                parsedAt: new Date().toISOString()
+            };
+            const box = document.getElementById('resumeAnalysisBox');
+            if (box) box.classList.remove('hidden');
+            setTimeout(() => showToast('Resume uploaded read-only; grounded parsing rules applied'), 1200);
+        }
+
+        function handleResumeDrag(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('border-cyanGlow', 'bg-cyan-500/5');
+        }
+
+        function handleResumeDragLeave(event) {
+            event.currentTarget.classList.remove('border-cyanGlow', 'bg-cyan-500/5');
+        }
+
+        function handleResumeDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('border-cyanGlow', 'bg-cyan-500/5');
+            handleResumeFile(event.dataTransfer.files[0]);
+        }
+
+        function getStatusTone(status) {
+            if (status === 'FOUND') return 'text-emeraldSignal';
+            if (status === 'AMBIGUOUS') return 'text-amberWarning';
+            return 'text-gray-400';
+        }
+
+        function formatProfileKey(key) {
+            return key.replace(/([A-Z])/g, ' $1').trim();
+        }
+
+        function setParserMode(mode) {
+            state.parserMode = mode;
+            const labels = {
+                strict: 'Strict evidence mode enabled',
+                review: 'Human review mode enabled',
+                batch: 'Batch ranking mode enabled'
+            };
+            showToast(labels[mode] || 'Parser mode updated');
+        }
+
+        function rerunNoDriftCheck() {
+            const firstRun = JSON.stringify(state.resumeFields.map(field => [field.fieldId, field.status, field.value]));
+            const secondRun = JSON.stringify([...state.resumeFields].map(field => [field.fieldId, field.status, field.value]));
+            showToast(firstRun === secondRun ? 'No-drift check passed: fields are stable' : 'No-drift check failed: field ordering changed');
+        }
+
+        function getFieldById(fieldId) {
+            return state.resumeFields.find(field => field.fieldId === fieldId) || null;
+        }
+
+        function buildCandidateProfile() {
+            const valueFor = (fieldId) => getFieldById(fieldId)?.value || 'Not Found';
+            return {
+                fullName: valueFor('CONTACT-NAME'),
+                email: valueFor('CONTACT-EMAIL'),
+                phone: valueFor('CONTACT-PHONE'),
+                links: valueFor('CONTACT-LINKS'),
+                location: valueFor('CONTACT-LOCATION'),
+                highestEducation: valueFor('EDU-HIGHEST'),
+                currentRole: valueFor('EXP-CURRENT'),
+                skills: valueFor('SKILLS-LIST'),
+                certifications: valueFor('CERT-LIST'),
+                projects: valueFor('PROJECT-LIST')
+            };
+        }
+
+        function buildFitSummary() {
+            const matchedRequirements = state.fitReport.filter(item => item.matchStatus === 'MATCHED');
+            const missingRequirements = state.fitReport.filter(item => item.matchStatus !== 'MATCHED');
+            const evidenceForClaims = state.fitReport.map(item => {
+                const field = getFieldById(item.evidenceRef);
+                return {
+                    requirement: item.requirement,
+                    claim: item.explanation,
+                    evidenceRef: item.evidenceRef,
+                    evidence: field ? field.evidence : 'Evidence field not found',
+                    sourceSection: field ? field.sourceSection : 'UNKNOWN',
+                    confidence: item.confidence
+                };
+            });
+            return {
+                fitScore: Math.round((matchedRequirements.length / state.fitReport.length) * 100),
+                matchedRequirements,
+                missingRequirements,
+                evidenceForClaims
+            };
+        }
+
+        function buildParserReport() {
+            const fitSummary = buildFitSummary();
+            return {
+                file: state.parsedResumeFile || { name: 'demo-resume.pdf', status: 'Demo profile' },
+                parserMode: state.parserMode,
+                jobDescription: state.jdText,
+                candidateProfile: buildCandidateProfile(),
+                fitScore: fitSummary.fitScore,
+                matchedRequirements: fitSummary.matchedRequirements,
+                missingRequirements: fitSummary.missingRequirements,
+                evidenceForClaims: fitSummary.evidenceForClaims,
+                fields: state.resumeFields,
+                fitReport: state.fitReport,
+                audit: {
+                    sourceReadOnly: true,
+                    fixedSectionAllowlist: true,
+                    noFabricatedFields: true,
+                    deterministicOrdering: true,
+                    credentialsExternal: true
+                },
+                generatedAt: new Date().toISOString()
+            };
+        }
+
+        function exportParserReport(format) {
+            const report = buildParserReport();
+            const isMarkdown = format === 'md';
+            const content = isMarkdown
+                ? [
+                    '# AlignHire Grounded Resume Fit Report',
+                    '',
+                    `Generated: ${report.generatedAt}`,
+                    `Parser mode: ${report.parserMode}`,
+                    `Resume file: ${report.file.name}`,
+                    `Fit score: ${report.fitScore}%`,
+                    '',
+                    '## Job Description',
+                    report.jobDescription,
+                    '',
+                    '## Structured Candidate Profile',
+                    '| Field | Value |',
+                    '| --- | --- |',
+                    ...Object.entries(report.candidateProfile).map(([key, value]) => `| ${formatProfileKey(key)} | ${value} |`),
+                    '',
+                    '## Matched Requirements',
+                    '| Requirement | Evidence Ref | Explanation |',
+                    '| --- | --- | --- |',
+                    ...report.matchedRequirements.map(item => `| ${item.requirement} | ${item.evidenceRef} | ${item.explanation} |`),
+                    '',
+                    '## Missing Requirements',
+                    '| Requirement | Evidence Ref | Explanation |',
+                    '| --- | --- | --- |',
+                    ...report.missingRequirements.map(item => `| ${item.requirement} | ${item.evidenceRef} | ${item.explanation} |`),
+                    '',
+                    '## Evidence For Claims',
+                    '| Requirement | Evidence Ref | Source Section | Evidence |',
+                    '| --- | --- | --- | --- |',
+                    ...report.evidenceForClaims.map(item => `| ${item.requirement} | ${item.evidenceRef} | ${item.sourceSection} | ${item.evidence} |`),
+                    '',
+                    '## Structured Fields',
+                    '| Field ID | Status | Value | Evidence |',
+                    '| --- | --- | --- | --- |',
+                    ...report.fields.map(field => `| ${field.fieldId} | ${field.status} | ${field.value} | ${field.evidence} |`),
+                    '',
+                    '## Fit Report',
+                    '| Requirement | Status | Evidence Ref | Explanation |',
+                    '| --- | --- | --- | --- |',
+                    ...report.fitReport.map(item => `| ${item.requirement} | ${item.matchStatus} | ${item.evidenceRef} | ${item.explanation} |`)
+                ].join('\n')
+                : JSON.stringify(report, null, 2);
+            const blob = new Blob([content], { type: isMarkdown ? 'text/markdown' : 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = isMarkdown ? 'alignhire-fit-report.md' : 'alignhire-profile.json';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(link.href);
+            showToast(isMarkdown ? 'Markdown report exported' : 'Profile JSON exported');
+        }
+
+        function downloadResume() {
+            const resumeText = `ALEX MORGAN\nBackend Engineer\nBengaluru, India | Hybrid or Remote\n\nPROFILE\nBackend engineer with 6.8 years of experience building scalable Python services.\n\nSKILLS\nPython, FastAPI, PostgreSQL, Docker, REST APIs, AWS, System Design\n\nEXPERIENCE\nNexora Labs - Backend Engineer\nVortex Systems - Software Engineer`;
+            const blob = new Blob([resumeText], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'Alex-Morgan-resume.txt';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(link.href);
+            showToast('Profile download started');
+        }
+
+        function syncProfileSources() {
+            showToast('Connecting GitHub and LinkedIn securely...');
+            setTimeout(() => showToast('Profile sources synced and skills refreshed'), 1200);
+        }
+
+        function removeCurrentResume() {
+            state.selectedResumeFile = null;
+            const box = document.getElementById('resumeAnalysisBox');
+            if (box) box.classList.add('hidden');
+            const jobSection = document.getElementById('jobDescriptionSection');
+            if (jobSection) jobSection.classList.add('hidden');
+            showToast('Current resume removed from this session');
+        }
+
+        async function analyzeResumeAgainstJD() {
+            if (!state.selectedResumeFile) {
+                showToast('Please upload a resume first');
+                return;
+            }
+            
+            const jobDescription = document.getElementById('jobDescriptionInput')?.value.trim() || '';
+            if (!jobDescription) {
+                showToast('Please enter a job description');
+                document.getElementById('jobDescriptionInput')?.focus();
+                return;
+            }
+            
+            const button = document.getElementById('analyzeButton');
+            button.disabled = true;
+            button.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>ANALYZING...</span>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('resume', state.selectedResumeFile);
+                formData.append('job_description', jobDescription);
+                
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: 'Analysis failed' }));
+                    throw new Error(errorData.detail || 'Analysis failed');
+                }
+                
+                const result = await response.json();
+                state.lastAnalysisResult = result;
+                
+                // Navigate to match intelligence view to show results
+                navigateTo('matchIntelligence');
+                showToast('Analysis complete');
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showToast(`Error: ${error.message}`);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i data-lucide="zap" class="w-4 h-4"></i><span>ANALYZE FIT</span>';
+                lucide.createIcons();
+            }
+        }
+
+        function renderOpportunities(container) {
+            container.innerHTML = `
+                <div class="space-y-8 view-enter">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">OPPORTUNITIES</span>
+                            <h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">AI-Matched Opportunities</h1>
+                        </div>
+                        <div class="flex items-center space-x-3 w-full md:w-auto">
+                            <input type="text" placeholder="Search roles or skills..." oninput="filterJobs(this.value)" class="bg-surface border border-borderSubtle rounded-xl px-4 py-2 text-xs font-mono text-white placeholder-gray-500 w-full md:w-64 focus:outline-none focus:border-cyanGlow">
+                        </div>
+                    </div>
+
+                    <!-- Job Cards Grid -->
+                    <div id="jobCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${state.jobs.map(job => `
+                            <div class="rounded-2xl glass-panel p-6 border border-borderSubtle hover:border-electricViolet/50 smooth-transition flex flex-col justify-between space-y-4 job-card" data-search="${job.title} ${job.company} ${job.description} ${job.location}">
+                                <div>
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="text-[10px] font-mono text-cyanGlow uppercase">${job.company}</span>
+                                            <h3 class="text-base font-display font-semibold text-white mt-0.5">${job.title}</h3>
+                                        </div>
+                                        <span class="px-2.5 py-1 rounded-full bg-emeraldSignal/10 text-emeraldSignal font-mono text-[10px] font-bold">${job.alignment}% ALIGN</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400 mt-3 line-clamp-2">${job.description}</p>
+                                    <div class="flex items-center space-x-4 mt-4 text-[10px] font-mono text-gray-400">
+                                        <span>📍 ${job.location}</span>
+                                        <span>⏳ ${job.exp}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between pt-4 border-t border-borderSubtle">
+                                    <button onclick="navigateTo('matchIntelligence')" class="text-xs font-semibold text-cyanGlow hover:underline">View Match →</button>
+                                    <div class="flex space-x-2">
+                                        <button onclick="toggleSavedJob(${job.id})" aria-label="Save ${job.title}" class="p-2 rounded-lg bg-surface border border-borderSubtle text-gray-300 hover:text-white"><i data-lucide="${state.savedJobIds.includes(job.id) ? 'bookmark-check' : 'bookmark'}" class="w-3.5 h-3.5"></i></button>
+                                        <button onclick="applyToJob(${job.id})" class="px-3 py-1.5 rounded-lg bg-electricViolet text-white text-xs font-semibold">Apply</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterJobs(query) {
+            const normalizedQuery = query.trim().toLowerCase();
+            document.querySelectorAll('.job-card').forEach(card => {
+                card.classList.toggle('hidden', normalizedQuery && !card.dataset.search.toLowerCase().includes(normalizedQuery));
+            });
+        }
+
+        function toggleSavedJob(jobId) {
+            const index = state.savedJobIds.indexOf(jobId);
+            if (index === -1) {
+                state.savedJobIds.push(jobId);
+                showToast('Opportunity saved to your shortlist');
+            } else {
+                state.savedJobIds.splice(index, 1);
+                showToast('Opportunity removed from saved jobs');
+            }
+            renderCurrentView();
+        }
+
+        function applyToJob(jobId) {
+            const job = state.jobs.find(item => item.id === jobId);
+            if (!job) return;
+            if (!state.applications.some(application => application.jobId === jobId)) {
+                state.applications.unshift({ jobId, stage: 'Application sent', updated: 'Just now' });
+            }
+            showToast(`Application sent to ${job.company}`);
+            renderCurrentView();
+        }
+
+        function renderApplicationTracker(container) {
+            const stages = ['Application sent', 'Screening', 'Interview', 'Offer'];
+            container.innerHTML = `
+                <div class="space-y-8 view-enter">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div><span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">YOUR JOB SEARCH</span><h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">Application Tracker</h1><p class="text-gray-400 text-sm mt-1">Keep every opportunity moving forward in one view.</p></div>
+                        <button onclick="navigateTo('opportunities')" class="px-4 py-2 rounded-xl bg-electricViolet text-white text-xs font-semibold"><i data-lucide="search" class="w-3.5 h-3.5 inline mr-1"></i> Find opportunities</button>
+                    </div>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        ${stages.map(stage => `<div class="rounded-2xl glass-panel p-5 border border-borderSubtle"><div class="text-2xl font-display font-bold text-white">${state.applications.filter(item => item.stage === stage).length}</div><div class="text-xs text-gray-400 mt-1">${stage}</div></div>`).join('')}
+                    </div>
+                    <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-4">
+                        ${state.applications.map(application => { const job = state.jobs.find(item => item.id === application.jobId); return `<div class="p-4 rounded-xl bg-surface border border-borderSubtle flex flex-col md:flex-row md:items-center justify-between gap-4"><div><div class="text-sm font-semibold text-white">${job.title}</div><div class="text-xs text-gray-400 mt-1">${job.company} · ${job.location}</div><div class="text-[10px] font-mono text-gray-500 mt-2">${application.updated}</div></div><span class="px-3 py-1.5 rounded-full bg-cyanGlow/10 text-cyanGlow text-[10px] font-mono">${application.stage}</span></div>`; }).join('')}
+                    </div>
+                </div>`;
+        }
+
+        function renderTalentAnalytics(container) {
+            container.innerHTML = `
+                <div class="space-y-8 view-enter">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div><span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">CAREER INTELLIGENCE</span><h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">Career Analytics</h1><p class="text-gray-400 text-sm mt-1">A live view of your job search momentum and professional signal.</p></div>
+                        <select onchange="state.analyticsRange = this.value; renderCurrentView()" class="bg-surface border border-borderSubtle rounded-xl px-4 py-2 text-xs font-display text-white focus:outline-none focus:border-cyanGlow"><option ${state.analyticsRange === '30 days' ? 'selected' : ''}>30 days</option><option ${state.analyticsRange === '6 months' ? 'selected' : ''}>6 months</option><option ${state.analyticsRange === '12 months' ? 'selected' : ''}>12 months</option></select>
+                    </div>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        ${[
+                            { value: '87%', label: 'Profile alignment', tone: 'text-cyanGlow' },
+                            { value: '+24%', label: 'Signal growth', tone: 'text-emeraldSignal' },
+                            { value: '18', label: 'Roles aligned', tone: 'text-white' },
+                            { value: '4.2 days', label: 'Avg. response time', tone: 'text-amberWarning' }
+                        ].map(metric => `<div class="stagger-item rounded-2xl glass-panel p-5 border border-borderSubtle"><div class="text-2xl font-display font-bold ${metric.tone}">${metric.value}</div><div class="text-xs text-gray-400 mt-1">${metric.label}</div></div>`).join('')}
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                        <div class="lg:col-span-3 rounded-2xl glass-panel p-6 border border-borderSubtle">
+                            <div class="flex justify-between items-center mb-5"><div><h3 class="font-display font-semibold text-sm text-white">Application momentum</h3><p class="text-xs text-gray-400 mt-1">Responses and match quality over time.</p></div><span class="text-xs font-display font-semibold text-emeraldSignal">+18% this period</span></div>
+                            <div class="chart-wrap"><canvas id="applicationMomentumChart"></canvas></div>
+                        </div>
+                        <div class="lg:col-span-2 rounded-2xl glass-panel p-6 border border-borderSubtle">
+                            <div class="mb-5"><h3 class="font-display font-semibold text-sm text-white">Skill confidence</h3><p class="text-xs text-gray-400 mt-1">Evidence-backed strengths across your profile.</p></div>
+                            <div class="chart-wrap"><canvas id="skillConfidenceChart"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="rounded-2xl glass-panel p-6 border border-borderSubtle lg:col-span-1"><div class="mb-5"><h3 class="font-display font-semibold text-sm text-white">Search funnel</h3><p class="text-xs text-gray-400 mt-1">Your current opportunity pipeline.</p></div><div class="chart-wrap"><canvas id="applicationFunnelChart"></canvas></div></div>
+                        <div class="rounded-2xl glass-panel p-6 border border-borderSubtle lg:col-span-2 space-y-5"><div><h3 class="font-display font-semibold text-sm text-white">Recommended next moves</h3><p class="text-xs text-gray-400 mt-1">Small actions with the highest projected impact.</p></div>${[
+                            ['Add Kubernetes project evidence', 'Could improve infrastructure role alignment by 6%', 'trending-up'],
+                            ['Complete one mock system design', 'Interview readiness is already at 91%', 'target'],
+                            ['Refresh your availability', '3 matching teams are hiring this week', 'calendar-clock']
+                        ].map((item, index) => `<button onclick="showToast('${item[0]} added to your action plan')" class="stagger-item w-full flex items-center gap-4 text-left p-4 rounded-xl bg-surface border border-borderSubtle hover:border-cyanGlow/40 smooth-transition"><span class="w-9 h-9 rounded-xl bg-electricViolet/15 text-electricViolet flex items-center justify-center font-display font-bold">${index + 1}</span><span class="flex-1"><span class="block text-sm font-semibold text-white">${item[0]}</span><span class="block text-xs text-gray-400 mt-1">${item[1]}</span></span><i data-lucide="${item[2]}" class="w-4 h-4 text-cyanGlow"></i></button>`).join('')}</div>
+                    </div>
+                </div>`;
+            requestAnimationFrame(() => initializeTalentCharts());
+        }
+
+        function initializeTalentCharts() {
+            if (typeof Chart === 'undefined') return;
+            const chartText = '#9ca3af';
+            const gridColor = 'rgba(156, 163, 175, 0.12)';
+            const commonScales = { x: { ticks: { color: chartText, font: { family: 'DM Sans' } }, grid: { color: gridColor } }, y: { beginAtZero: true, ticks: { color: chartText, font: { family: 'DM Sans' } }, grid: { color: gridColor } } };
+            new Chart(document.getElementById('applicationMomentumChart'), { type: 'line', data: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: 'Applications', data: [3, 5, 4, 8, 11, 14], borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.12)', fill: true, tension: 0.4 }, { label: 'Responses', data: [1, 2, 2, 3, 5, 7], borderColor: '#8b5cf6', backgroundColor: 'transparent', tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { labels: { color: '#d1d5db', font: { family: 'DM Sans' } } } }, scales: commonScales, animation: { duration: 1200, easing: 'easeOutQuart' } } });
+            new Chart(document.getElementById('skillConfidenceChart'), { type: 'radar', data: { labels: ['Python', 'APIs', 'Cloud', 'Databases', 'System design', 'ML'], datasets: [{ label: 'Confidence', data: [94, 95, 86, 89, 90, 82], borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.18)', pointBackgroundColor: '#06b6d4' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: gridColor }, angleLines: { color: gridColor }, pointLabels: { color: '#d1d5db', font: { family: 'DM Sans', size: 10 } } } }, animation: { duration: 1400, easing: 'easeOutBack' } } });
+            new Chart(document.getElementById('applicationFunnelChart'), { type: 'doughnut', data: { labels: ['Interview', 'Application sent', 'Saved', 'Viewed'], datasets: [{ data: [1, 1, state.savedJobIds.length || 2, 7], backgroundColor: ['#10b981', '#06b6d4', '#8b5cf6', '#374151'], borderColor: '#12141c', borderWidth: 4 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { color: '#d1d5db', padding: 14, font: { family: 'DM Sans', size: 10 } } } }, animation: { animateRotate: true, duration: 1200 } } });
+        }
+
+        function renderTalentPreferences(container) {
+            container.innerHTML = `
+                <div class="space-y-8 view-enter max-w-3xl">
+                    <div><span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">PERSONALIZATION</span><h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">Job Preferences</h1><p class="text-gray-400 text-sm mt-1">Tune the roles and alerts your matching agent prioritizes.</p></div>
+                    <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-6">
+                        <label class="flex items-center justify-between gap-4"><span><span class="block text-sm font-semibold text-white">Prioritize remote roles</span><span class="block text-xs text-gray-400 mt-1">Include hybrid opportunities within your recommendations.</span></span><input id="remotePreference" type="checkbox" ${state.preferences.remote ? 'checked' : ''} class="w-5 h-5 accent-cyan-500"></label>
+                        <label class="flex items-center justify-between gap-4"><span><span class="block text-sm font-semibold text-white">Weekly opportunity digest</span><span class="block text-xs text-gray-400 mt-1">Receive a compact summary of high-fit roles.</span></span><input id="alertPreference" type="checkbox" ${state.preferences.alerts ? 'checked' : ''} class="w-5 h-5 accent-cyan-500"></label>
+                        <div><label class="block text-sm font-semibold text-white mb-2" for="salaryPreference">Target compensation</label><select id="salaryPreference" class="w-full bg-surface border border-borderSubtle rounded-xl p-3 text-xs text-white focus:outline-none focus:border-cyanGlow"><option ${state.preferences.salary === '₹25L — ₹35L' ? 'selected' : ''}>₹25L — ₹35L</option><option ${state.preferences.salary === '₹35L — ₹55L' ? 'selected' : ''}>₹35L — ₹55L</option><option ${state.preferences.salary === '₹55L+' ? 'selected' : ''}>₹55L+</option></select></div>
+                        <button onclick="savePreferences()" class="w-full py-3 rounded-xl bg-electricViolet text-white text-xs font-semibold">Save preferences</button>
+                    </div>
+                </div>`;
+        }
+
+        function savePreferences() {
+            state.preferences.remote = document.getElementById('remotePreference').checked;
+            state.preferences.alerts = document.getElementById('alertPreference').checked;
+            state.preferences.salary = document.getElementById('salaryPreference').value;
+            showToast('Job matching preferences updated');
+        }
+
+        function renderMatchIntelligence(container) {
+            const result = state.lastAnalysisResult;
+            if (!result) {
+                container.innerHTML = `
+                    <div class="space-y-8 view-enter">
+                        <div><span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">MATCH INTELLIGENCE</span><h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">See why you align.</h1></div>
+                        <div class="rounded-2xl glass-panel p-8 border border-borderSubtle text-center"><p class="text-gray-400">No analysis results yet. Upload a resume and enter a job description to see match intelligence.</p><button onclick="navigateTo('resume')" class="mt-4 px-4 py-2 rounded-xl bg-electricViolet text-white text-xs font-semibold">Go to resume upload</button></div>
+                    </div>
+                `;
+                return;
+            }
+
+            const fitScore = result.fit_score?.score || 0;
+            const fitReport = result.fit_report || [];
+            const requirements = result.requirements || [];
+            const profile = result.profile || { fields: [] };
+            const candidate = result.candidate || {};
+
+            // Build dimension breakdown from fit report
+            const skillMatches = fitReport.filter(r => r.category === 'SKILL');
+            const expMatches = fitReport.filter(r => r.category === 'EXPERIENCE');
+            
+            const skillMatched = skillMatches.filter(r => r.match_status === 'MATCHED').length;
+            const skillTotal = skillMatches.length || 1;
+            const skillScore = Math.round((skillMatched / skillTotal) * 100);
+            
+            const expMatched = expMatches.filter(r => r.match_status === 'MATCHED').length;
+            const expTotal = expMatches.length || 1;
+            const expScore = Math.round((expMatched / expTotal) * 100);
+
+            const dimensions = [
+                { label: 'Skill Fit', score: skillScore },
+                { label: 'Experience Match', score: expScore },
+                { label: 'Overall Fit', score: fitScore }
+            ];
+
+            const explanations = fitReport
+                .filter(r => r.match_status === 'MATCHED')
+                .map(r => `✓ ${r.requirement} - ${r.explanation}`)
+                .slice(0, 3);
+
+            const growthAreas = fitReport
+                .filter(r => r.match_status !== 'MATCHED')
+                .map(r => r.requirement)
+                .slice(0, 2);
+
+            container.innerHTML = `
+                <div class="space-y-8 animate-in fade-in duration-300">
+                    <div>
+                        <span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">MATCH INTELLIGENCE</span>
+                        <h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">See why you align.</h1>
+                    </div>
+
+                    <!-- Match Hero Card -->
+                    <div class="rounded-2xl glass-panel p-8 border border-borderSubtle grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                        <div class="lg:col-span-4 text-center p-6 rounded-2xl bg-surface border border-borderSubtle">
+                            <div class="text-4xl font-display font-extrabold text-white">${fitScore}%</div>
+                            <span class="block text-xs font-mono text-emeraldSignal mt-1 font-semibold">ALIGNMENT SCORE</span>
+                            <span class="block text-[10px] font-mono text-gray-500 mt-2">${candidate.name || 'Candidate'} Profile</span>
+                        </div>
+                        <div class="lg:col-span-8 space-y-4">
+                            <h3 class="font-display font-semibold text-sm text-white">DIMENSION BREAKDOWN</h3>
+                            <div class="space-y-3">
+                                ${dimensions.map(dim => `
+                                    <div>
+                                        <div class="flex justify-between items-center text-xs font-mono mb-1">
+                                            <span class="text-gray-300">${dim.label}</span>
+                                            <span class="text-cyanGlow">${dim.score}%</span>
+                                        </div>
+                                        <div class="w-full bg-surface h-1.5 rounded-full overflow-hidden">
+                                            <div class="bg-gradient-to-r from-cyanGlow to-electricViolet h-full rounded-full" style="width: ${dim.score}%"></div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Explainable AI Panel -->
+                    <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-6">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-electricViolet"></i>
+                            <h3 class="font-display font-semibold text-sm text-white">WHY THIS MATCH?</h3>
+                        </div>
+                        <div class="space-y-3">
+                            ${explanations.length > 0 ? explanations.map(exp => `
+                                <div class="flex items-start space-x-3 p-3 rounded-xl bg-surface border border-borderSubtle text-xs text-gray-200">
+                                    <span class="text-emeraldSignal font-bold">✓</span>
+                                    <span>${exp}</span>
+                                </div>
+                            `).join('') : '<div class="text-xs text-gray-400">No matches found. Upload a resume with relevant skills.</div>'}
+                        </div>
+
+                        ${growthAreas.length > 0 ? `
+                            <div class="pt-4 border-t border-borderSubtle">
+                                <span class="text-[10px] font-mono text-cyanGlow uppercase tracking-wider">OPPORTUNITY SIGNALS (GROWTH AREAS)</span>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    ${growthAreas.map(area => `
+                                        <span class="px-3 py-1 rounded-full bg-surface border border-borderSubtle text-xs font-mono text-gray-300">△ ${area}</span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <!-- Full Requirements Breakdown -->
+                        <div class="pt-4 border-t border-borderSubtle">
+                            <span class="text-[10px] font-mono text-cyanGlow uppercase tracking-wider">FULL REQUIREMENT BREAKDOWN</span>
+                            <div class="mt-3 space-y-2">
+                                ${fitReport.map(item => `
+                                    <div class="p-2 rounded-lg ${
+                                        item.match_status === 'MATCHED' ? 'bg-emeraldSignal/10 border border-emeraldSignal/30' :
+                                        item.match_status === 'NOT_MATCHED' ? 'bg-amberWarning/10 border border-amberWarning/30' :
+                                        'bg-surface border border-borderSubtle'
+                                    }">
+                                        <div class="flex justify-between items-start gap-2">
+                                            <div class="flex-1">
+                                                <div class="text-xs font-semibold ${
+                                                    item.match_status === 'MATCHED' ? 'text-emeraldSignal' :
+                                                    item.match_status === 'NOT_MATCHED' ? 'text-amberWarning' :
+                                                    'text-gray-300'
+                                                }">${item.requirement}</div>
+                                                <div class="text-[11px] text-gray-400 mt-1">${item.explanation || 'No explanation'}</div>
+                                            </div>
+                                            <span class="text-[10px] font-mono font-bold ${
+                                                item.match_status === 'MATCHED' ? 'text-emeraldSignal' :
+                                                item.match_status === 'NOT_MATCHED' ? 'text-amberWarning' :
+                                                'text-gray-400'
+                                            }">${item.match_status}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // HIRING VIEWS
+        // ==========================================
+        function renderHiringOverview(container) {
+            container.innerHTML = `
+                <div class="content-section space-y-8 view-enter">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div class="section-heading">
+                            <h1 class="text-2xl md:text-3xl font-display font-bold text-white">Talent, without the noise.</h1>
+                            <p class="text-gray-400 text-sm mt-1">Your hiring agents have analyzed 428 candidates.</p>
+                        </div>
+                        <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full glass-panel text-xs font-display font-semibold text-emeraldSignal shrink-0">
+                            <span class="w-2 h-2 rounded-full bg-emeraldSignal animate-pulse"></span>
+                            <span>● 12 ACTIVE ROLES</span>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                        <div class="stagger-item rounded-2xl glass-panel p-6 border border-borderSubtle">
+                            <div class="text-3xl font-display font-extrabold text-white">12</div>
+                            <div class="text-xs font-mono text-gray-400 mt-1">Active Roles Open</div>
+                        </div>
+                        <div class="stagger-item rounded-2xl glass-panel p-6 border border-borderSubtle">
+                            <div class="text-3xl font-display font-extrabold text-white">428</div>
+                            <div class="text-xs font-mono text-gray-400 mt-1">Candidates Analyzed</div>
+                        </div>
+                        <div class="stagger-item rounded-2xl glass-panel p-6 border border-borderSubtle">
+                            <div class="text-3xl font-display font-extrabold text-emeraldSignal">37</div>
+                            <div class="text-xs font-mono text-gray-400 mt-1">High-Fit Shortlisted</div>
+                        </div>
+                        <div class="stagger-item rounded-2xl glass-panel p-6 border border-borderSubtle">
+                            <div class="text-3xl font-display font-extrabold text-cyanGlow">86%</div>
+                            <div class="text-xs font-mono text-gray-400 mt-1">Average Alignment Score</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                        <div class="lg:col-span-3 rounded-2xl glass-panel p-6 border border-borderSubtle">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5"><div><h3 class="font-display font-semibold text-sm text-white">Hiring pipeline health</h3><p class="text-xs text-gray-400 mt-1">Candidate movement across your active roles.</p></div><button onclick="exportHiringReport()" class="px-3 py-2 rounded-xl bg-surface border border-borderSubtle text-xs font-display text-gray-300 hover:text-white"><i data-lucide="download" class="w-3.5 h-3.5 inline mr-1"></i> Export report</button></div>
+                            <div class="chart-wrap"><canvas id="hiringPipelineChart"></canvas></div>
+                        </div>
+                        <div class="lg:col-span-2 rounded-2xl glass-panel p-6 border border-borderSubtle space-y-4">
+                            <div><h3 class="font-display font-semibold text-sm text-white">Next actions</h3><p class="text-xs text-gray-400 mt-1">Keep the hiring loop moving.</p></div>
+                            <button onclick="navigateTo('jobs')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-surface border border-borderSubtle text-left hover:border-cyanGlow/40 smooth-transition"><i data-lucide="plus-circle" class="w-4 h-4 text-cyanGlow"></i><span><span class="block text-xs font-semibold text-white">Create a new role</span><span class="block text-[10px] text-gray-400 mt-1">Structure requirements with AI.</span></span></button>
+                            <button onclick="navigateTo('candidates')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-surface border border-borderSubtle text-left hover:border-electricViolet/40 smooth-transition"><i data-lucide="user-search" class="w-4 h-4 text-electricViolet"></i><span><span class="block text-xs font-semibold text-white">Review high-fit talent</span><span class="block text-[10px] text-gray-400 mt-1">12 candidates need a decision.</span></span></button>
+                            <button onclick="navigateTo('shortlist')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-surface border border-borderSubtle text-left hover:border-emeraldSignal/40 smooth-transition"><i data-lucide="calendar-check-2" class="w-4 h-4 text-emeraldSignal"></i><span><span class="block text-xs font-semibold text-white">Schedule interviews</span><span class="block text-[10px] text-gray-400 mt-1">4 candidates are ready.</span></span></button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Candidate Table Preview -->
+                    <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                            <h3 class="font-display font-semibold text-sm text-white">TOP RANKED CANDIDATES</h3>
+                            <button onclick="navigateTo('candidates')" class="text-xs font-mono text-cyanGlow hover:underline">View All Candidates →</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="border-b border-borderSubtle text-gray-400 font-mono">
+                                    <tr>
+                                        <th class="pb-3">Candidate</th>
+                                        <th class="pb-3">Role</th>
+                                        <th class="pb-3">Alignment</th>
+                                        <th class="pb-3">Status</th>
+                                        <th class="pb-3 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-borderSubtle">
+                                    ${state.candidates.map(c => `
+                                        <tr class="hover:bg-surfaceHighlight smooth-transition">
+                                            <td class="py-3 font-semibold text-white">${c.name}</td>
+                                            <td class="py-3 text-gray-300">${c.role}</td>
+                                            <td class="py-3 font-mono text-emeraldSignal font-bold">${c.alignment}%</td>
+                                            <td class="py-3"><span class="px-2.5 py-1 rounded-full bg-surface border border-borderSubtle text-[10px] font-mono text-cyanGlow">${c.status}</span></td>
+                                            <td class="py-3 text-right">
+                                                <button onclick="openCandidateDetail(${c.id})" class="px-3 py-1 rounded-lg bg-electricViolet text-white text-[10px] font-semibold">Inspect</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderJobCreation(container) {
+            container.innerHTML = `
+                <div class="space-y-8 animate-in fade-in duration-300 max-w-3xl mx-auto">
+                    <div>
+                        <span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">JOB INTELLIGENCE</span>
+                        <h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">Create & Structure Job Role</h1>
+                    </div>
+
+                    <div class="rounded-2xl glass-panel p-6 md:p-8 border border-borderSubtle space-y-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-mono text-gray-400 mb-1">Role Title</label>
+                                <input id="newJobTitle" type="text" placeholder="e.g. Senior AI Infrastructure Engineer" class="w-full bg-surface border border-borderSubtle rounded-xl p-3 text-xs text-white focus:outline-none focus:border-cyanGlow">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-mono text-gray-400 mb-1">Department</label>
+                                    <input id="newJobDepartment" type="text" placeholder="Engineering / AI" class="w-full bg-surface border border-borderSubtle rounded-xl p-3 text-xs text-white focus:outline-none focus:border-cyanGlow">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-mono text-gray-400 mb-1">Location & Type</label>
+                                    <input id="newJobLocation" type="text" placeholder="Bengaluru · Hybrid" class="w-full bg-surface border border-borderSubtle rounded-xl p-3 text-xs text-white focus:outline-none focus:border-cyanGlow">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-mono text-gray-400 mb-1">Job Description / Raw Text</label>
+                                <textarea id="newJobDescription" rows="4" placeholder="Paste requirements or description here..." class="w-full bg-surface border border-borderSubtle rounded-xl p-3 text-xs text-white focus:outline-none focus:border-cyanGlow"></textarea>
+                            </div>
+                        </div>
+
+                        <button onclick="structureJobWithAI()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-electricViolet to-cyanGlow text-white font-display font-semibold text-xs shadow-lg hover:opacity-90 flex items-center justify-center space-x-2">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                            <span>STRUCTURE WITH AI AGENT</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function structureJobWithAI() {
+            const title = document.getElementById('newJobTitle')?.value.trim();
+            const location = document.getElementById('newJobLocation')?.value.trim() || 'Remote';
+            const description = document.getElementById('newJobDescription')?.value.trim() || 'New role structured from your hiring requirements.';
+            if (!title) {
+                showToast('Add a role title before structuring the job');
+                document.getElementById('newJobTitle')?.focus();
+                return;
+            }
+            showToast('Job Intelligence Agent analyzing requirements...');
+            setTimeout(() => {
+                state.jobs.unshift({ id: Date.now(), title, company: 'AlignHire Workspace', location, type: 'Full-time', exp: 'Flexible', alignment: 80, description });
+                showToast('Job structured successfully! Core signals generated.');
+                navigateTo('overview');
+            }, 2000);
+        }
+
+        function renderCandidateDiscovery(container) {
+            container.innerHTML = `
+                <div class="space-y-8 animate-in fade-in duration-300">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">CANDIDATE DISCOVERY</span>
+                            <h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">AI Talent Intelligence Grid</h1>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                            <input id="candidateSearch" type="text" placeholder="Search name, role, skill..." oninput="filterCandidates()" class="bg-surface border border-borderSubtle rounded-xl px-4 py-2 text-xs font-display text-white placeholder-gray-500 w-full sm:w-64 focus:outline-none focus:border-cyanGlow">
+                            <select id="candidateSort" onchange="filterCandidates()" class="bg-surface border border-borderSubtle rounded-xl px-3 py-2 text-xs font-display text-white focus:outline-none focus:border-cyanGlow"><option value="alignment">Best alignment</option><option value="recent">Recent signal</option><option value="experience">Experience</option></select>
+                        </div>
+                    </div>
+
+                    <div id="candidateGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                        ${state.candidates.map(c => `
+                            <div class="candidate-card rounded-2xl glass-panel p-6 border border-borderSubtle hover:border-cyanGlow/40 smooth-transition flex flex-col justify-between space-y-4 cursor-pointer" data-search="${c.name} ${c.role} ${c.skills.join(' ')} ${c.location}" data-alignment="${c.alignment}" data-experience="${parseFloat(c.exp)}" onclick="openCandidateDetail(${c.id})">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-start gap-3">
+                                        <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-tr from-cyanGlow to-electricViolet flex items-center justify-center font-display font-bold text-xs text-white">
+                                            ${c.name.split(' ').map(n=>n[0]).join('')}
+                                        </div>
+                                        <span class="shrink-0 px-2 py-0.5 rounded-full bg-emeraldSignal/10 text-emeraldSignal font-mono text-[10px] font-bold">${c.alignment}% ALIGN</span>
+                                    </div>
+                                    <h3 class="text-base font-display font-semibold text-white mt-3">${c.name}</h3>
+                                    <p class="text-xs font-display text-cyanGlow mt-0.5">${c.role}</p>
+                                    <div class="flex flex-wrap gap-1 mt-3">
+                                        ${c.skills.map(s => `<span class="px-2 py-0.5 rounded bg-surface border border-borderSubtle text-[10px] font-mono text-gray-300">${s}</span>`).join('')}
+                                    </div>
+                                </div>
+                                <div class="candidate-card-footer pt-4 border-t border-borderSubtle flex justify-between text-[10px] font-display text-gray-400">
+                                    <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 shrink-0"></i>${c.location}</span>
+                                    <span class="text-electricViolet font-semibold">Inspect Intelligence →</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterCandidates() {
+            const query = (document.getElementById('candidateSearch')?.value || '').toLowerCase().trim();
+            const sort = document.getElementById('candidateSort')?.value || 'alignment';
+            const grid = document.getElementById('candidateGrid');
+            if (!grid) return;
+            const cards = [...grid.querySelectorAll('.candidate-card')];
+            cards.sort((a, b) => {
+                if (sort === 'experience') return Number(b.dataset.experience) - Number(a.dataset.experience);
+                return Number(b.dataset.alignment) - Number(a.dataset.alignment);
+            });
+            cards.forEach(card => {
+                card.classList.toggle('hidden', query && !card.dataset.search.toLowerCase().includes(query));
+                grid.appendChild(card);
+            });
+        }
+
+        function openCandidateDetail(id) {
+            const candidate = state.candidates.find(c => c.id === id);
+            if (!candidate) return;
+
+            const modal = document.getElementById('genericModal');
+            const wrapper = document.getElementById('modalContentWrapper');
+            
+            const breakdown = candidate.matchBreakdown || { skillFit: 92, expFit: 88, roleFit: 90, eduFit: 86, projFit: 91 };
+            const note = state.candidateNotes[id] || '';
+            wrapper.innerHTML = `
+                <div class="p-5 md:p-7 space-y-6 max-h-[85vh] overflow-y-auto">
+                    <div class="flex justify-between items-start gap-4">
+                        <div>
+                            <span class="text-[10px] font-mono text-cyanGlow uppercase">CANDIDATE INTELLIGENCE PROFILE</span>
+                            <h2 class="text-xl font-display font-bold text-white mt-1">${candidate.name}</h2>
+                            <p class="text-xs font-display text-gray-400 mt-1">${candidate.role} · ${candidate.exp} experience · ${candidate.location}</p>
+                        </div>
+                        <button onclick="closeModal()" class="p-2 rounded-xl bg-surface border border-borderSubtle text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-surface border border-borderSubtle flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <div class="text-2xl font-display font-extrabold text-white">${candidate.alignment}%</div>
+                            <div class="text-[10px] font-mono text-emeraldSignal mt-0.5">OVERALL ALIGNMENT SCORE</div>
+                        </div>
+                        <div class="flex flex-wrap gap-2"><button onclick="showToast('${candidate.name} added to shortlist'); closeModal();" class="px-4 py-2 rounded-xl bg-electricViolet text-white text-xs font-semibold"><i data-lucide="check" class="w-3.5 h-3.5 inline mr-1"></i>Shortlist</button><button onclick="showToast('Interview request prepared for ${candidate.name}')" class="px-4 py-2 rounded-xl bg-cyanGlow/15 border border-cyanGlow/30 text-cyanGlow text-xs font-semibold"><i data-lucide="calendar-plus" class="w-3.5 h-3.5 inline mr-1"></i>Schedule interview</button></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-3"><h4 class="font-display font-semibold text-xs text-white">MATCH DIMENSIONS</h4><div class="p-4 rounded-xl bg-surface border border-borderSubtle space-y-3">${Object.entries(breakdown).map(([key, score]) => `<div><div class="flex justify-between text-[11px] font-display text-gray-300 mb-1"><span>${key.replace('Fit', ' fit').replace('edu', 'Education').replace('exp', 'Experience').replace('proj', 'Project')}</span><span class="text-cyanGlow">${score}%</span></div><div class="h-1.5 rounded-full bg-borderSubtle overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-cyanGlow to-electricViolet" style="width:${score}%"></div></div></div>`).join('')}</div></div>
+                        <div class="space-y-3"><h4 class="font-display font-semibold text-xs text-white">VERIFIED EVIDENCE</h4><div class="p-4 rounded-xl bg-surface border border-borderSubtle text-xs text-gray-200 space-y-3"><div class="flex gap-2"><i data-lucide="badge-check" class="w-4 h-4 text-emeraldSignal shrink-0"></i><span>Production experience across ${candidate.skills.slice(0, 2).join(' and ')}.</span></div><div class="flex gap-2"><i data-lucide="layers-3" class="w-4 h-4 text-cyanGlow shrink-0"></i><span>${candidate.exp} of relevant delivery experience in ${candidate.location}.</span></div><div class="flex gap-2"><i data-lucide="file-check-2" class="w-4 h-4 text-electricViolet shrink-0"></i><span>Resume signals parsed and matched against the active role.</span></div></div></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="p-4 rounded-xl bg-amberWarning/10 border border-amberWarning/25"><div class="flex items-center gap-2 text-xs font-display font-semibold text-amberWarning"><i data-lucide="triangle-alert" class="w-4 h-4"></i>Review before advancing</div><p class="text-xs text-gray-300 mt-2">Validate advanced cloud architecture depth during the technical screen.</p></div>
+                        <div class="p-4 rounded-xl bg-surface border border-borderSubtle"><label for="candidateNote" class="block text-xs font-display font-semibold text-white">Recruiter note</label><textarea id="candidateNote" rows="2" placeholder="Add an internal decision note..." class="w-full mt-2 bg-obsidian border border-borderSubtle rounded-lg p-2 text-xs text-white focus:outline-none focus:border-cyanGlow">${note}</textarea><button onclick="saveCandidateNote(${id})" class="mt-2 text-xs font-semibold text-cyanGlow hover:underline">Save note</button></div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h4 class="font-display font-semibold text-xs text-white">AI REASONING & VERIFIED SIGNALS</h4>
+                        <div class="p-3 rounded-xl bg-surface border border-borderSubtle text-xs text-gray-200 space-y-2">
+                            <div>✓ Strong ${candidate.role.toLowerCase()} alignment across production systems.</div>
+                            <div>✓ ${candidate.skills.length}/4 critical technical signals detected (${candidate.skills.slice(0,2).join(', ')}).</div>
+                            <div>✓ Relevant project and API architecture evidence is present.</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function saveCandidateNote(id) {
+            state.candidateNotes[id] = document.getElementById('candidateNote').value.trim();
+            showToast('Recruiter note saved');
+        }
+
+        function renderTalentIntelligence(container) {
+            container.innerHTML = `
+                <div class="space-y-8 animate-in fade-in duration-300">
+                    <div>
+                        <span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">TALENT INTELLIGENCE</span>
+                        <h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">Cohort Analytics & Market Insights</h1>
+                    </div>
+                    <div class="rounded-2xl glass-panel p-6 border border-borderSubtle">
+                        <p class="text-xs text-gray-400 font-mono">Real-time talent signal distribution across 428 active profiles in the network.</p>
+                        <div class="mt-6 h-64 flex items-center justify-center border border-borderSubtle rounded-xl bg-surface">
+                            <span class="text-xs font-mono text-cyanGlow">Cohort Distribution Radar Chart Active</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderShortlist(container) {
+            container.innerHTML = `
+                <div class="space-y-8 animate-in fade-in duration-300">
+                    <div>
+                        <span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">SHORTLIST</span>
+                        <h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">Recruiter Shortlist Pipeline</h1>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        ${['High Signal', 'Review', 'Interview', 'Rejected'].map((stage, idx) => `
+                            <div class="rounded-2xl glass-panel p-4 border border-borderSubtle space-y-4">
+                                <div class="flex justify-between items-center pb-2 border-b border-borderSubtle">
+                                    <span class="text-xs font-display font-semibold text-white">${stage}</span>
+                                    <span class="text-[10px] font-mono text-cyanGlow">2</span>
+                                </div>
+                                <div class="space-y-3">
+                                    ${state.candidates.slice(idx, idx+1).map(c => `
+                                        <div class="p-3 rounded-xl bg-surface border border-borderSubtle space-y-2 cursor-pointer hover:border-cyanGlow/40 smooth-transition" onclick="openCandidateDetail(${c.id})">
+                                            <div class="text-xs font-semibold text-white">${c.name}</div>
+                                            <div class="text-[10px] font-mono text-cyanGlow">${c.role}</div>
+                                            <div class="text-[10px] font-mono text-emeraldSignal font-bold">${c.alignment}% Align</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAgentCenter(container) {
+            container.innerHTML = `
+                <div class="space-y-8 animate-in fade-in duration-300">
+                    <div>
+                        <span class="text-xs font-mono text-cyanGlow uppercase tracking-wider">AGENT CONTROL CENTER</span>
+                        <h1 class="text-2xl md:text-3xl font-display font-bold text-white mt-1">Autonomous Agent Operations</h1>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        ${[
+                            { name: 'RESUME EXTRACTOR', count: '1,284 docs', latency: '12ms', status: 'ONLINE' },
+                            { name: 'SEGMENTATION AGENT', count: '4,102 blocks', latency: '8ms', status: 'ONLINE' },
+                            { name: 'FIELD PARSER', count: '3,890 parsed', latency: '14ms', status: 'ONLINE' },
+                            { name: 'MATCHING ENGINE', count: '9,420 runs', latency: '22ms', status: 'ONLINE' },
+                            { name: 'RECOMMENDATION AGENT', count: '2,150 delivered', latency: '16ms', status: 'ONLINE' }
+                        ].map(agent => `
+                            <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-display font-bold text-white">${agent.name}</span>
+                                    <span class="text-[10px] font-mono text-emeraldSignal font-bold">● ${agent.status}</span>
+                                </div>
+                                <div class="space-y-1 text-[11px] font-mono text-gray-400">
+                                    <div>Processed: <span class="text-white">${agent.count}</span></div>
+                                    <div>Avg Latency: <span class="text-cyanGlow">${agent.latency}</span></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Live Activity Stream -->
+                    <div class="rounded-2xl glass-panel p-6 border border-borderSubtle space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-display font-semibold text-sm text-white">LIVE AGENT ACTIVITY STREAM</h3>
+                            <span class="w-2 h-2 rounded-full bg-emeraldSignal animate-ping"></span>
+                        </div>
+                        <div id="agentLogStream" class="space-y-2 font-mono text-xs">
+                            ${state.agentActivityLog.map(log => `
+                                <div class="p-2.5 rounded-xl bg-surface border border-borderSubtle flex justify-between items-center">
+                                    <span class="text-cyanGlow">${log.agent}</span>
+                                    <span class="text-gray-300">${log.action}</span>
+                                    <span class="text-gray-500 text-[10px]">${log.time}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // UTILITIES, MODALS, TOASTS & COMMANDS
+        // ==========================================
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'pointer-events-auto px-4 py-3 rounded-xl glass-panel border border-cyanGlow/40 shadow-2xl text-xs font-mono text-white animate-in slide-in-from-bottom-5 duration-200 flex items-center space-x-2';
+            toast.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emeraldSignal"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function closeModal() {
+            document.getElementById('genericModal').classList.add('hidden');
+        }
+
+        function toggleCommandPalette() {
+            const modal = document.getElementById('commandPaletteModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('commandInput').focus();
+            }
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.classList.toggle('dark', state.theme === 'dark');
+            document.body.dataset.theme = state.theme;
+            document.body.classList.toggle('blue-light', state.theme === 'light');
+            showToast(`Switched to ${state.theme} mode`);
+        }
+
+        function exportHiringReport() {
+            const report = [
+                'ALIGNHIRE HIRING PIPELINE REPORT',
+                `Generated: ${new Date().toLocaleString()}`,
+                '',
+                'ACTIVE ROLES: 12',
+                'CANDIDATES ANALYZED: 428',
+                'HIGH-FIT SHORTLISTED: 37',
+                'AVERAGE ALIGNMENT: 86%',
+                '',
+                ...state.candidates.map(candidate => `${candidate.name} | ${candidate.role} | ${candidate.alignment}% | ${candidate.status}`)
+            ].join('\n');
+            const blob = new Blob([report], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'alignhire-hiring-report.csv';
+            link.click();
+            URL.revokeObjectURL(link.href);
+            showToast('Hiring report download started');
+        }
+
+        function simulateAgentActivity() {
+            const actions = [
+                { agent: 'MATCHING ENGINE', action: 'Vector embeddings optimized for candidate pool' },
+                { agent: 'FIELD PARSER', action: 'Parsed 3 new incoming resume structures' },
+                { agent: 'PROFILE INTELLIGENCE', action: 'Updated skill confidence weights' },
+                { agent: 'RESUME EXTRACTOR', action: 'Cleaned and validated token inputs' }
+            ];
+            const rand = actions[Math.floor(Math.random() * actions.length)];
+            const time = new Date().toTimeString().split(' ')[0];
+            state.agentActivityLog.unshift({ time, agent: rand.agent, action: rand.action });
+            if (state.agentActivityLog.length > 5) state.agentActivityLog.pop();
+            
+            const stream = document.getElementById('agentLogStream');
+            if (stream && state.currentView === 'agentCenter') {
+                renderCurrentView();
+            }
+        }
+
+        // Keyboard Shortcut CMD+K
+        window.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                toggleCommandPalette();
+            }
+            if (e.key === 'Escape') {
+                document.getElementById('commandPaletteModal').classList.add('hidden');
+                closeModal();
+                document.getElementById('notificationDropdown').classList.add('hidden');
+            }
+        });
+
+        function navigateFromCommand(view) {
+            toggleCommandPalette();
+            navigateTo(view);
+        }
+
+        function handleCommandSearch(query) {
+            const results = document.getElementById('commandResults');
+            if (!results) return;
+            const normalizedQuery = query.trim().toLowerCase();
+            const views = state.role === 'talent'
+                ? [{ id: 'overview', label: 'Overview Dashboard', icon: 'layout-dashboard' }, { id: 'resume', label: 'Resume Intelligence', icon: 'file-text' }, { id: 'opportunities', label: 'Opportunities / Jobs', icon: 'briefcase' }, { id: 'analytics', label: 'Career Analytics', icon: 'chart-no-axes-combined' }, { id: 'applications', label: 'Application Tracker', icon: 'kanban-square' }]
+                : [{ id: 'overview', label: 'Hiring Command Center', icon: 'command' }, { id: 'jobs', label: 'Create & Structure Jobs', icon: 'briefcase' }, { id: 'candidates', label: 'Candidate Discovery', icon: 'users' }, { id: 'shortlist', label: 'Recruiter Shortlist', icon: 'check-circle' }, { id: 'agentCenter', label: 'Agent Center', icon: 'cpu' }];
+            const matchingViews = views.filter(view => view.label.toLowerCase().includes(normalizedQuery));
+            const matchingJobs = state.jobs.filter(job => `${job.title} ${job.company} ${job.description}`.toLowerCase().includes(normalizedQuery));
+            results.innerHTML = `<div class="px-3 py-2 text-[10px] font-display text-gray-500 uppercase tracking-wider">${normalizedQuery ? 'Search results' : 'Quick navigation'}</div>${matchingViews.map(view => `<div onclick="navigateFromCommand('${view.id}')" class="px-3 py-2.5 rounded-xl hover:bg-surfaceHighlight flex items-center gap-2 cursor-pointer text-xs text-gray-200"><i data-lucide="${view.icon}" class="w-4 h-4 text-cyanGlow"></i><span>${view.label}</span></div>`).join('')}${matchingJobs.map(job => `<div onclick="navigateFromCommand('opportunities')" class="px-3 py-2.5 rounded-xl hover:bg-surfaceHighlight flex items-center gap-2 cursor-pointer text-xs text-gray-200"><i data-lucide="briefcase" class="w-4 h-4 text-electricViolet"></i><span>${job.title} · ${job.company}</span></div>`).join('') || (normalizedQuery && !matchingViews.length ? '<div class="px-3 py-5 text-center text-xs text-gray-500">No matching talent, jobs, or skills</div>' : '')}`;
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

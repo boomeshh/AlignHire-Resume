@@ -1,4 +1,37 @@
+import re
 from typing import Dict
+
+def clean_heading(line: str) -> str:
+    """
+    Cleans a heading candidate by:
+    1. Stripping surrounding whitespace.
+    2. Removing common markdown heading markers (e.g., #, ##).
+    3. Removing leading bullets (e.g., •, ▪, -, *).
+    4. Removing list numbering (e.g., 1., A., I.).
+    5. Stripping leading/trailing punctuation and markdown elements.
+    6. Collapsing internal whitespace.
+    7. Converting to lowercase.
+    """
+    cleaned = line.strip()
+    
+    # Remove common markdown heading markers from the beginning
+    cleaned = re.sub(r'^#+\s*', '', cleaned)
+    
+    # Remove leading bullets and list numbering
+    # Matches bullet chars or number/letter followed by period/dash/parenthesis
+    cleaned = re.sub(
+        r'^(?:\s*(?:[•▪\-\*o\u2022\u25aa\u25fe\u25fc\u25fb]|\b(?:[0-9]+|[a-zA-Z]|[ivxIVX]+)[\.\-\)]))\s*',
+        '',
+        cleaned
+    )
+    
+    # Strip leading/trailing punctuation and formatting
+    cleaned = cleaned.strip("*-#_ :")
+    
+    # Normalize internal whitespace
+    cleaned = " ".join(cleaned.split())
+    
+    return cleaned.lower()
 
 def segment_text(text: str) -> Dict[str, str]:
     """
@@ -38,8 +71,8 @@ def segment_text(text: str) -> Dict[str, str]:
                 sections[current_section].append("")
             continue
             
-        # Clean heading candidates: strip common punctuation like colons, dashes, asterisks
-        clean_candidate = stripped_line.rstrip(":").strip("*-#_ ").lower()
+        # Clean heading candidates using robust normalization
+        clean_candidate = clean_heading(stripped_line)
         
         # Check if the line is a section heading
         if clean_candidate in lookup and len(clean_candidate) < 30:

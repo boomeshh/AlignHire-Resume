@@ -11,8 +11,8 @@ def extract_text(file_path: str) -> str:
     path = Path(file_path)
     ext = path.suffix.lower()
     
-    # 1. Check file extension first
-    if ext not in (".pdf", ".docx", ".txt", ".text"):
+    # 1. Check file extension first (strictly .pdf, .docx, .txt)
+    if ext not in (".pdf", ".docx", ".txt"):
         raise ValueError(f"Unsupported file format: {ext}")
         
     # 2. Check if the file exists
@@ -26,9 +26,8 @@ def extract_text(file_path: str) -> str:
         text = _extract_from_pdf(path)
     elif ext == ".docx":
         text = _extract_from_docx(path)
-    elif ext in (".txt", ".text"):
+    elif ext == ".txt":
         text = _extract_from_txt(path)
-
         
     # 3. Do not silently return empty output
     if not text.strip():
@@ -42,8 +41,9 @@ def _extract_from_pdf(path: Path) -> str:
         reader = pypdf.PdfReader(str(path))
         for page in reader.pages:
             try:
-                page_text = page.extract_text()
-                if page_text:
+                # Safe handling for page.extract_text() returning None
+                page_text = page.extract_text() or ""
+                if page_text.strip():
                     text_parts.append(page_text)
             except Exception:
                 # Empty PDF pages must not crash
@@ -59,6 +59,11 @@ def _extract_from_docx(path: Path) -> str:
         text_parts = []
         for para in doc.paragraphs:
             text_parts.append(para.text)
+        for table in doc.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    if cell.text:
+                        text_parts.append(cell.text)
         return "\n".join(text_parts)
     except Exception as e:
         raise ValueError(f"Failed to parse DOCX file: {e}")
