@@ -381,7 +381,3 @@ These capabilities are reserved for subsequent development phases.
 The current implementation establishes the deterministic document-processing core and its stable integration contract for subsequent phases.
 
 ---
-
-## 📄 License
-
-Add the project's chosen license here before public distribution.
