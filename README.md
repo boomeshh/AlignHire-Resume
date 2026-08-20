@@ -1,20 +1,73 @@
-# ProofResume
+# AlignHire (Phase 1)
 
 ## Tagline
-**Evidence-Grounded Resume Intelligence Agent**
+**Deterministic Resume Intelligence and Parsing Backend**
 
-## Problem Statement
-Recruiters waste significant time vetting resume details because traditional ATS systems often parse candidate fields inaccurately or invent details (hallucination) without verifiable evidence from the source document.
-
-## Phase 1 Objective
-Build a deterministic, reliable text extraction and segmentation pipeline that parses key candidate fields (Full Name, Email, Phone, Skills, Education) and attaches exact evidence/source context to each extracted value without using complex or non-deterministic AI models.
+## Overview
+AlignHire is a lightweight, deterministic backend processing engine designed to parse candidate resumes (PDF, DOCX, TXT) and segment them into standardized sections. It extracts essential contact details (Name, Email, Phone) and maps them alongside the original job description.
 
 ## Architecture
 ```
-Extractor → Segmenter → Parser → profile.json
+[Resume File] 
+      ↓
+[Extractor] ──> Raw text string
+      ↓
+[Segmenter] ──> Structured dictionary of sections (SUMMARY, SKILLS, EXPERIENCE, etc.)
+      ↓
+[Parser]    ──> Extracted candidate details (Name, Email, Phone)
+      ↓
+[Pipeline]  ──> Clean, serializable dict output
 ```
 
-- **Extractor**: Extracts raw string content from PDF/DOCX files.
-- **Segmenter**: Breaks the raw string down into a dictionary of defined sections.
-- **Parser**: Applies deterministic logic (regex, dict matching) to extract fields with source context and output status.
-- **profile.json**: The finalized structured data containing parsed fields and evidence.
+- **Extractor (`extractor.py`)**: Safely parses text from PDF, DOCX, and UTF-8 TXT files.
+- **Segmenter (`segmenter.py`)**: Uses deterministic rules to split resume text into standardized section headings.
+- **Parser (`parser.py`)**: Uses regex and word-pattern heuristics to extract candidate name, email, and Indian phone formats.
+- **Pipeline (`pipeline.py`)**: Orchestrates the modules into the stable main API `analyze_resume()`.
+
+---
+
+## Stable API Contract
+
+Future applications or UIs (e.g. Streamlit or FastAPI) can invoke the processing logic via:
+
+```python
+from backend.app.pipeline import analyze_resume
+
+result = analyze_resume(
+    resume_path="data/uploads/sample_resume.pdf",
+    job_description="Python developer with SQL experience"
+)
+```
+
+### Output Schema:
+```json
+{
+  "candidate": {
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "+91 9876543210"
+  },
+  "sections": {
+    "SUMMARY": "Python developer...",
+    "SKILLS": "Python, SQL, AWS...",
+    "EXPERIENCE": "Software Engineer at..."
+  },
+  "job_description": "Python developer with SQL experience"
+}
+```
+
+---
+
+## Development & Testing
+
+### Running Tests
+To run unit and integration tests:
+```bash
+pytest -q
+```
+
+### CLI Test Runner
+Run a direct CLI test:
+```bash
+python backend/main.py <resume_path> "<job_description>"
+```

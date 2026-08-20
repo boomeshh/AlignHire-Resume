@@ -19,9 +19,13 @@ __pycache__/
 .vscode/
 .idea/
 
-# Execution outputs
+# Execution outputs (old and new)
 output/
+data/outputs/*
+!data/outputs/.gitkeep
 
-# Private/personal candidate files (defaulting to protection)
+# Uploaded/input files (old and new)
 input/resume.pdf
 input/jd.txt
+data/uploads/*
+!data/uploads/.gitkeep
