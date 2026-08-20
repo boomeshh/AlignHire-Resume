@@ -1,0 +1,27 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+
+# Testing cache
+.pytest_cache/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Execution outputs
+output/
+
+# Private/personal candidate files (defaulting to protection)
+input/resume.pdf
+input/jd.txt
